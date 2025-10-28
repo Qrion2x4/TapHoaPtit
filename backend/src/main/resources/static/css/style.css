@@ -1,0 +1,148 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: #fafafa;
+  color: #333;
+}
+
+/* HEADER */
+header {
+  background-color: #008037;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+}
+header .logo { font-size: 20px; font-weight: bold; }
+header nav a {
+  color: white;
+  text-decoration: none;
+  margin: 0 12px;
+}
+header nav a:hover { text-decoration: underline; }
+
+/* LOGIN BUTTON */
+.user-area { display: flex; align-items: center; }
+.user-area button {
+  background-color: white;
+  color: #008037;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.user-area button:hover { background-color: #e6ffe6; }
+
+/* DROPDOWN ACCOUNT */
+.dropdown { position: relative; display: inline-block; }
+.account-btn {
+  background-color: white;
+  color: #008037;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.account-btn:hover { background-color: #e6ffe6; }
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: white;
+  min-width: 120px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  border-radius: 6px;
+  z-index: 100;
+}
+.dropdown-content a {
+  color: #008037;
+  padding: 10px 12px;
+  text-decoration: none;
+  display: block;
+}
+.dropdown-content a:hover { background-color: #f0fff0; }
+.dropdown:hover .dropdown-content { display: block; }
+
+/* BANNER */
+.banner img { width: 100%; height: auto; }
+
+/* PRODUCTS */
+.products { padding: 20px; text-align: center; }
+.products h2 { margin-bottom: 20px; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+.product {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  transition: 0.2s;
+}
+.product:hover { transform: scale(1.03); }
+.product img {
+  width: 100%; height: 150px; object-fit: cover; border-radius: 8px;
+}
+.product .name { font-weight: bold; margin-top: 8px; }
+.product .price { color: #e60023; }
+
+/* FOOTER */
+footer {
+  background-color: #008037;
+  color: white;
+  text-align: center;
+  padding: 12px;
+  margin-top: 20px;
+}
+
+/* LOGIN PAGE */
+.login-body {
+  background: linear-gradient(135deg, #00b353, #00782e);
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.login-container { width: 100%; max-width: 400px; padding: 20px; }
+.login-box {
+  background: white;
+  border-radius: 12px;
+  padding: 32px 24px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  text-align: center;
+}
+.login-box h2 { margin-bottom: 20px; color: #008037; }
+.login-box input {
+  width: 100%; padding: 10px; margin-bottom: 12px;
+  border: 1px solid #ccc; border-radius: 6px; font-size: 15px;
+}
+.login-box button {
+  width: 100%; background: #008037; color: white;
+  border: none; border-radius: 6px; padding: 10px;
+  font-size: 16px; cursor: pointer; transition: 0.2s;
+}
+.login-box button:hover { background: #00a347; }
+.login-box p.note { margin-top: 12px; font-size: 14px; }
+.login-box p.note a {
+  color: #008037; text-decoration: none; font-weight: bold;
+}
+.login-box p.note a:hover { text-decoration: underline; }
+.product button {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background-color: #008037;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.product button:hover {
+  background-color: #00a347;
+}
