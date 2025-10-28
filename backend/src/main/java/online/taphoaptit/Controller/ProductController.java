@@ -9,6 +9,7 @@ import online.taphoaptit.repository.ProductRepository;
 @RequestMapping("/api/products")
 @CrossOrigin(origins = "*")
 public class ProductController {
+
     private final ProductRepository repo;
 
     public ProductController(ProductRepository repo) {
@@ -18,5 +19,11 @@ public class ProductController {
     @GetMapping
     public List<Product> getAll() {
         return repo.findAll();
+    }
+
+    @PostMapping("/add")
+    public String addProduct(@RequestBody Product p) {
+        repo.save(p);
+        return "Thêm sản phẩm thành công!";
     }
 }
