@@ -1,0 +1,24 @@
+<div class="product-grid">
+    <div class="product-card" th:each="product : ${products}">
+        <div class="product-img" th:text="${product.imageUrl}">📦</div>
+        <div class="product-name" th:text="${product.name}">Tên sản phẩm</div>
+        <div class="product-price">
+            <span th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+            <span class="old-price" th:if="${product.oldPrice != null}" 
+                  th:text="${#numbers.formatDecimal(product.oldPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+        </div>
+        
+        <!-- NẾU ĐÃ ĐĂNG NHẬP -->
+        <form th:if="${username != null}" action="/cart/add" method="post">
+            <input type="hidden" name="productId" th:value="${product.id}">
+            <input type="hidden" name="quantity" value="1">
+            <input type="hidden" name="returnUrl" th:value="${#httpServletRequest.requestURI}">
+            <button type="submit" class="add-cart-btn">Thêm vào giỏ</button>
+        </form>
+        
+        <!-- NẾU CHƯA ĐĂNG NHẬP -->
+        <a th:if="${username == null}" href="/login" class="add-cart-btn" style="display: block; text-align: center; text-decoration: none;">
+            Đăng nhập để mua
+        </a>
+    </div>
+</div>
