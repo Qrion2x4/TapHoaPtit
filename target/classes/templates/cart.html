@@ -1,70 +1,227 @@
-<div class="cart-summary">
-    <h3>Tóm tắt đơn hàng</h3>
-    
-    <div class="summary-row subtotal">
-        <span>Tạm tính:</span>
-        <span th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ hàng - TapHoaPtit.online</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/cart.css}">
+</head>
+<body>
+    <!-- Header Top -->
+    <div class="header-top">
+        <div class="container">
+            <div>📞 Hotline: 1900 1234 | 📧 support@taphoaptit.online</div>
+            <div>
+                <span class="user-welcome">Xin chào, <strong th:text="${username}"></strong>!</span>
+                <a href="/logout" class="btn-logout">Đăng xuất</a>
+            </div>
+        </div>
     </div>
     
-    <div class="summary-row shipping">
-        <span>Phí vận chuyển:</span>
-        <span style="color: #27ae60; font-weight: 600;">Miễn phí</span>
+    <div class="header-main">
+        <div class="container">
+            <a href="/" class="logo">
+                <span class="logo-icon">🏪</span>
+                <span>TapHoaPtit.online</span>
+            </a>
+            <div class="search-box">
+                <form action="/search" method="get">
+                    <input type="text" name="keyword" placeholder="Tìm kiếm..." required>
+                    <button type="submit">🔍</button>
+                </form>
+            </div>
+            <a href="/cart" class="cart-link">
+                🛒
+                <span class="cart-badge" th:if="${cartCount > 0}" th:text="${cartCount}">0</span>
+            </a>
+        </div>
     </div>
     
-    <div class="coupon-section">
-        <input type="text" placeholder="Nhập mã giảm giá" id="coupon-input">
-        <button class="apply-coupon-btn">Áp dụng</button>
-    </div>
-    
-    <div class="summary-row total">
-        <span>Tổng cộng:</span>
-        <span class="total-price" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
-    </div>
-    
-    <!-- NÚT ĐẶT HÀNG -->
-    <button class="checkout-btn" onclick="openOrderModal()">
-        📦 Đặt hàng
-    </button>
-    
-    <a href="/" class="continue-shopping">← Tiếp tục mua sắm</a>
-</div>
-
-<!-- MODAL ĐẶT HÀNG -->
-<div id="orderModal" class="modal" style="display: none;">
-    <div class="modal-overlay" onclick="closeOrderModal()"></div>
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>📦 Xác nhận thông tin giao hàng</h2>
-            <button class="modal-close" onclick="closeOrderModal()">×</button>
+    <!-- Main -->
+    <div class="main-content">
+        <h1 class="page-title">
+            <span>🛒 Giỏ hàng của bạn</span>
+            <span class="cart-badge-summary" th:if="${cartCount > 0}" th:text="${cartCount} + ' sản phẩm'">0 sản phẩm</span>
+        </h1>
+        
+        <!-- Giỏ hàng trống -->
+        <div class="cart-container" th:if="${cartItems.size() == 0}">
+            <div class="empty-cart">
+                <div class="empty-cart-icon">🛒</div>
+                <h2>Giỏ hàng trống</h2>
+                <p>Bạn chưa có sản phẩm nào trong giỏ hàng</p>
+                <a href="/" class="continue-btn">🛍️ Tiếp tục mua sắm</a>
+            </div>
         </div>
         
-        <form id="orderForm" action="/order/place" method="post">
-            <div class="form-group">
-                <label for="phone">Số điện thoại: <span class="required">*</span></label>
-                <input type="tel" id="phone" name="phone" placeholder="Nhập số điện thoại..." required>
-            </div>
-            
-            <div class="form-group">
-                <label for="address">Địa chỉ giao hàng: <span class="required">*</span></label>
-                <textarea id="address" name="address" rows="3" placeholder="Nhập địa chỉ nhận hàng..." required></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label for="note">Ghi chú (tùy chọn):</label>
-                <textarea id="note" name="note" rows="2" placeholder="Ghi chú cho đơn hàng..."></textarea>
-            </div>
-            
-            <div class="order-summary-modal">
-                <div class="summary-row">
-                    <span>Tổng tiền:</span>
-                    <span class="total-price" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+        <!-- Có sản phẩm -->
+        <div class="cart-container" th:if="${cartItems.size() > 0}">
+            <!-- Cart Items -->
+            <div class="cart-items-section">
+                <h3>Sản phẩm trong giỏ</h3>
+                
+                <div class="cart-item" th:each="item : ${cartItems}">
+                    <div class="item-image">
+                        <div class="item-img" th:text="${item.product.imageUrl}">📦</div>
+                    </div>
+                    
+                    <div class="item-details">
+                        <div class="item-name" th:text="${item.product.name}">Tên sản phẩm</div>
+                        <div class="item-price" th:data-price="${item.product.price}" 
+                             th:text="${#numbers.formatDecimal(item.product.price, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</div>
+                        
+                        <div class="item-actions">
+                            <div class="item-quantity">
+                                <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post" style="display:inline;">
+                                    <button type="button" class="quantity-btn decrease-btn" th:data-id="${item.id}">−</button>
+                                    <input type="number" name="quantity" th:value="${item.quantity}" min="1" th:id="'qty-' + ${item.id}" readonly>
+                                    <button type="button" class="quantity-btn increase-btn" th:data-id="${item.id}">+</button>
+                                </form>
+                            </div>
+                            
+                            <form th:action="@{/cart/remove/{id}(id=${item.id})}" method="post" style="display:inline;">
+                                <button type="submit" class="remove-btn">🗑️ Xóa</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="item-right">
+                        <div class="item-total" th:text="${#numbers.formatDecimal(item.product.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</div>
+                    </div>
                 </div>
             </div>
             
-            <div class="modal-actions">
-                <button type="button" class="btn-cancel" onclick="closeOrderModal()">Hủy</button>
-                <button type="submit" class="btn-confirm">✓ Xác nhận đặt hàng</button>
+            <!-- Cart Summary -->
+            <div class="cart-summary">
+                <h3>Tóm tắt đơn hàng</h3>
+                
+                <div class="summary-row subtotal">
+                    <span>Tạm tính:</span>
+                    <span th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+                </div>
+                
+                <div class="summary-row shipping">
+                    <span>Phí vận chuyển:</span>
+                    <span style="color: #27ae60; font-weight: 600;">Miễn phí</span>
+                </div>
+                
+                <div class="coupon-section">
+                    <input type="text" placeholder="Nhập mã giảm giá" id="coupon-input">
+                    <button class="apply-coupon-btn">Áp dụng</button>
+                </div>
+                
+                <div class="summary-row total">
+                    <span>Tổng cộng:</span>
+                    <span class="total-price" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+                </div>
+                
+                <!-- NÚT ĐẶT HÀNG -->
+                <button type="button" class="checkout-btn" onclick="openOrderModal()">
+                    📦 Đặt hàng
+                </button>
+                
+                <a href="/" class="continue-shopping">← Tiếp tục mua sắm</a>
             </div>
-        </form>
+        </div>
     </div>
-</div>
+    
+    <!-- MODAL ĐẶT HÀNG -->
+    <div id="orderModal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeOrderModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📦 Xác nhận thông tin giao hàng</h2>
+                <button type="button" class="modal-close" onclick="closeOrderModal()">×</button>
+            </div>
+            
+            <form id="orderForm" action="/order/place" method="post">
+                <div class="form-group">
+                    <label for="phone">Số điện thoại: <span class="required">*</span></label>
+                    <input type="tel" id="phone" name="phone" placeholder="Nhập số điện thoại..." required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="address">Địa chỉ giao hàng: <span class="required">*</span></label>
+                    <textarea id="address" name="address" rows="3" placeholder="Nhập địa chỉ nhận hàng..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="note">Ghi chú (tùy chọn):</label>
+                    <textarea id="note" name="note" rows="2" placeholder="Ghi chú cho đơn hàng..."></textarea>
+                </div>
+                
+                <div class="order-summary-modal">
+                    <div class="summary-row">
+                        <span>Tổng tiền:</span>
+                        <span class="total-price" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeOrderModal()">Hủy</button>
+                    <button type="submit" class="btn-confirm">✓ Xác nhận đặt hàng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <div class="container">
+            <div>
+                <h3>Về TapHoaPtit.online</h3>
+                <p>Tạp hóa trực tuyến hàng đầu Việt Nam</p>
+                <p>Giao hàng nhanh - Giá cả hợp lý</p>
+            </div>
+            <div>
+                <h3>Hỗ trợ khách hàng</h3>
+                <a href="#">Hướng dẫn mua hàng</a>
+                <a href="#">Chính sách đổi trả</a>
+                <a href="#">Phương thức thanh toán</a>
+            </div>
+            <div>
+                <h3>Liên hệ</h3>
+                <p>📞 Hotline: 1900 1234</p>
+                <p>📧 Email: support@taphoaptit.online</p>
+            </div>
+        </div>
+        <div class="copyright">
+            © 2024 TapHoaPtit.online - Tạp hóa trực tuyến
+        </div>
+    </div>
+    
+    <script th:src="@{/js/cart.js}"></script>
+    <script>
+        // Inline script để đảm bảo functions hoạt động
+        function openOrderModal() {
+            console.log('Opening modal...');
+            const modal = document.getElementById('orderModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                console.log('Modal opened!');
+            } else {
+                console.error('Modal not found!');
+            }
+        }
+        
+        function closeOrderModal() {
+            console.log('Closing modal...');
+            const modal = document.getElementById('orderModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                console.log('Modal closed!');
+            }
+        }
+        
+        // Close on ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeOrderModal();
+            }
+        });
+    </script>
+</body>
+</html>
