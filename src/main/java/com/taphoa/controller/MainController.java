@@ -1,8 +1,10 @@
 package com.taphoa.controller;
 
+import com.taphoa.entity.Order;
 import com.taphoa.entity.Product;
 import com.taphoa.entity.User;
 import com.taphoa.service.CartService;
+import com.taphoa.service.OrderService;
 import com.taphoa.service.ProductService;
 import com.taphoa.service.UserService;
 import jakarta.servlet.http.HttpSession;
@@ -23,6 +25,9 @@ public class MainController {
     
     @Autowired
     private CartService cartService;
+    
+    @Autowired
+    private OrderService orderService;
     
     @GetMapping("/")
     public String home(HttpSession session, Model model) {
@@ -172,5 +177,27 @@ public class MainController {
         model.addAttribute("keyword", keyword);
         
         return "products";
+    }
+    
+    @GetMapping("/my-orders")
+    public String myOrders(HttpSession session, Model model) {
+        Long userId = (Long) session.getAttribute("userId");
+        
+        if (userId == null) {
+            return "redirect:/login";
+        }
+        
+        User user = userService.getUserById(userId);
+        if (user == null) {
+            return "redirect:/login";
+        }
+        
+        List<Order> orders = orderService.getUserOrders(user);
+        
+        model.addAttribute("username", session.getAttribute("username"));
+        model.addAttribute("orders", orders);
+        model.addAttribute("cartCount", cartService.getCartCount(user));
+        
+        return "my-orders";
     }
 }

@@ -40,9 +40,9 @@ public class OrderController {
             Order order = orderService.createOrder(user, phone, address, note);
             
             redirectAttributes.addFlashAttribute("success", 
-                "Đặt hàng thành công! Mã đơn hàng: #" + order.getId());
+                "✅ Đặt hàng thành công! Mã đơn hàng: #" + order.getId());
             
-            return "redirect:/";
+            return "redirect:/my-orders";
             
         } catch (Exception e) {
             System.out.println("ERROR placing order: " + e.getMessage());

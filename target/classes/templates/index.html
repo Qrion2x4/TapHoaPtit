@@ -20,6 +20,7 @@
             <div class="user-actions">
                 <div th:if="${username}">
                     <span class="user-welcome">Xin chào, <strong th:text="${username}">User</strong>! 👋</span>
+                    <a href="/my-orders" class="auth-btn" style="background: rgba(255,255,255,0.2); margin-right: 10px;">📦 Đơn hàng</a>
                     <a href="/logout" class="auth-btn btn-logout">Đăng xuất</a>
                 </div>
                 <div th:unless="${username}">
@@ -34,7 +35,7 @@
     <div class="header-main">
         <div class="container">
             <a href="/" class="logo">
-                <span class="logo-icon">🏪</span>
+                <span class="logo-icon">🪙</span>
                 <span>TapHoaPtit.online</span>
             </a>
             <div class="search-box">
@@ -59,6 +60,7 @@
                 <li><a href="/products/category/Đồ uống">🥤 Đồ uống</a></li>
                 <li><a href="/products/category/Gia vị">🧂 Gia vị</a></li>
                 <li><a href="/products/category/Chăm sóc cá nhân">🧴 Chăm sóc cá nhân</a></li>
+                <li th:if="${username != null}"><a href="/my-orders">📦 Đơn hàng của tôi</a></li>
                 <li><a href="#" style="color: #ff6b6b;">🔥 Khuyến mãi</a></li>
             </ul>
         </div>
@@ -198,7 +200,7 @@
     <div class="footer">
         <div class="container">
             <div>
-                <h3>🏪 Về TapHoaPtit.online</h3>
+                <h3>🪙 Về TapHoaPtit.online</h3>
                 <p>Tạp hóa trực tuyến hàng đầu Việt Nam</p>
                 <p>Giao hàng nhanh - Giá cả hợp lý</p>
                 <p>Hàng chính hãng - Đảm bảo chất lượng</p>
@@ -225,7 +227,7 @@
             </div>
         </div>
         <div class="copyright">
-            © 2025 TapHoaPtit.online - Tạp hóa trực tuyến hàng đầu Việt Nam
+            © 2024 TapHoaPtit.online - Tạp hóa trực tuyến hàng đầu Việt Nam
         </div>
     </div>
     
