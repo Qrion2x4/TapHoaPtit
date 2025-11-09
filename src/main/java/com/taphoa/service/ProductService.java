@@ -4,6 +4,7 @@ import com.taphoa.entity.Product;
 import com.taphoa.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
@@ -32,7 +33,15 @@ public class ProductService {
         return productRepository.findByNameContaining(keyword);
     }
     
+    @Transactional
     public Product saveProduct(Product product) {
+        System.out.println("Saving product: " + product.getName());
         return productRepository.save(product);
+    }
+    
+    @Transactional
+    public void deleteProduct(Long id) {
+        System.out.println("Deleting product ID: " + id);
+        productRepository.deleteById(id);
     }
 }

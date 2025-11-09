@@ -34,6 +34,11 @@ public class MainController {
             if (userId != null) {
                 User user = userService.getUserById(userId);
                 if (user != null) {
+                    // Nếu là admin thì redirect về trang admin
+                    if ("ADMIN".equals(user.getRole())) {
+                        return "redirect:/admin";
+                    }
+                    
                     int cartCount = cartService.getCartCount(user);
                     model.addAttribute("cartCount", cartCount);
                 }
@@ -68,13 +73,21 @@ public class MainController {
             if (user != null) {
                 session.setAttribute("username", user.getUsername());
                 session.setAttribute("userId", user.getId());
+                session.setAttribute("userRole", user.getRole());
                 
                 // LOG
                 System.out.println("=== LOGIN SUCCESS ===");
                 System.out.println("Username: " + user.getUsername());
                 System.out.println("UserId: " + user.getId());
+                System.out.println("Role: " + user.getRole());
                 System.out.println("Session ID: " + session.getId());
                 
+                // Nếu là ADMIN thì redirect về /admin
+                if ("ADMIN".equals(user.getRole())) {
+                    return "redirect:/admin";
+                }
+                
+                // Nếu là USER thì về trang chủ
                 return "redirect:/";
             } else {
                 model.addAttribute("error", "Sai tên đăng nhập hoặc mật khẩu!");

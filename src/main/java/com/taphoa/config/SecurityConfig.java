@@ -10,19 +10,19 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
     
-   @Bean
-public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf().disable()
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/", "/register", "/login", "/products/**", "/search", 
-                           "/cart", "/cart/**", "/order/**", "/logout",  // ← THÊM /order/**
-                           "/css/**", "/js/**", "/images/**").permitAll()
-            .anyRequest().authenticated()
-        )
-        .formLogin().disable()
-        .logout().disable();
-    
-    return http.build();
-}
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())  // Tắt CSRF để test
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/**").permitAll()  // Cho phép tất cả requests
+                .anyRequest().authenticated()
+            )
+            .formLogin(form -> form.disable())
+            .logout(logout -> logout.disable());
+        
+        System.out.println("✅ Security Config: All requests are permitted");
+        
+        return http.build();
+    }
 }
