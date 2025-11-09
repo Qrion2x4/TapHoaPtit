@@ -11,18 +11,25 @@
     <!-- Header Top -->
     <div class="header-top">
         <div class="container">
-            <div>📞 Hotline: 1900 1234 | 📧 support@taphoaptit.online</div>
-            <div>
-                <span class="user-welcome">Xin chào, <strong th:text="${username}"></strong>!</span>
-                <a href="/logout" class="btn-logout">Đăng xuất</a>
+            <div class="info-item">
+                <span>🚚 Miễn phí vận chuyển đơn từ 200k</span>
+                <span style="margin-left: 20px;">📞 Hotline: 1900 1234</span>
+            </div>
+            <div class="user-actions">
+                <div>
+                    <span class="user-welcome">Xin chào, <strong th:text="${username}">User</strong>! 👋</span>
+                    <a href="/my-orders" class="auth-btn" style="background: rgba(255,255,255,0.2); margin-right: 10px;">📦 Đơn hàng</a>
+                    <a href="/logout" class="auth-btn btn-logout">Đăng xuất</a>
+                </div>
             </div>
         </div>
     </div>
     
+    <!-- Header Main -->
     <div class="header-main">
         <div class="container">
             <a href="/" class="logo">
-                <span class="logo-icon">🏪</span>
+                <span class="logo-icon">🪙</span>
                 <span>TapHoaPtit.online</span>
             </a>
             <div class="search-box">
@@ -35,6 +42,20 @@
                 🛒
                 <span class="cart-badge" th:if="${cartCount > 0}" th:text="${cartCount}">0</span>
             </a>
+        </div>
+    </div>
+    
+    <!-- Navigation Menu -->
+    <div class="nav-menu">
+        <div class="container">
+            <ul>
+                <li><a href="/">🏠 Trang chủ</a></li>
+                <li><a href="/products/category/Thực phẩm">🍚 Thực phẩm</a></li>
+                <li><a href="/products/category/Đồ uống">🥤 Đồ uống</a></li>
+                <li><a href="/products/category/Gia vị">🧂 Gia vị</a></li>
+                <li><a href="/products/category/Chăm sóc cá nhân">🧴 Chăm sóc cá nhân</a></li>
+                <li><a href="#" style="color: #ff6b6b;">🔥 Khuyến mãi</a></li>
+            </ul>
         </div>
     </div>
     
@@ -170,20 +191,20 @@
     <div class="footer">
         <div class="container">
             <div>
-                <h3>Về TapHoaPtit.online</h3>
+                <h3>🪙 Về TapHoaPtit.online</h3>
                 <p>Tạp hóa trực tuyến hàng đầu Việt Nam</p>
                 <p>Giao hàng nhanh - Giá cả hợp lý</p>
             </div>
             <div>
-                <h3>Hỗ trợ khách hàng</h3>
+                <h3>📋 Hỗ trợ khách hàng</h3>
                 <a href="#">Hướng dẫn mua hàng</a>
                 <a href="#">Chính sách đổi trả</a>
                 <a href="#">Phương thức thanh toán</a>
             </div>
             <div>
-                <h3>Liên hệ</h3>
-                <p>📞 Hotline: 1900 1234</p>
-                <p>📧 Email: support@taphoaptit.online</p>
+                <h3>📞 Liên hệ</h3>
+                <p>Hotline: 1900 1234</p>
+                <p>Email: support@taphoaptit.online</p>
             </div>
         </div>
         <div class="copyright">
@@ -193,30 +214,22 @@
     
     <script th:src="@{/js/cart.js}"></script>
     <script>
-        // Inline script để đảm bảo functions hoạt động
         function openOrderModal() {
-            console.log('Opening modal...');
             const modal = document.getElementById('orderModal');
             if (modal) {
                 modal.style.display = 'flex';
                 document.body.style.overflow = 'hidden';
-                console.log('Modal opened!');
-            } else {
-                console.error('Modal not found!');
             }
         }
         
         function closeOrderModal() {
-            console.log('Closing modal...');
             const modal = document.getElementById('orderModal');
             if (modal) {
                 modal.style.display = 'none';
                 document.body.style.overflow = 'auto';
-                console.log('Modal closed!');
             }
         }
         
-        // Close on ESC
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeOrderModal();

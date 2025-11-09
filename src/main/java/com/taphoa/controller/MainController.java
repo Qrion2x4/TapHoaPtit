@@ -135,6 +135,9 @@ public class MainController {
     
     @GetMapping("/products/category/{category}")
     public String productsByCategory(@PathVariable String category, Model model, HttpSession session) {
+        System.out.println("=== CATEGORY PAGE ===");
+        System.out.println("Category: " + category);
+        
         String username = (String) session.getAttribute("username");
         model.addAttribute("username", username);
         
@@ -150,14 +153,19 @@ public class MainController {
         }
         
         List<Product> products = productService.getProductsByCategory(category);
+        System.out.println("Found " + products.size() + " products in category: " + category);
+        
         model.addAttribute("products", products);
         model.addAttribute("category", category);
         
-        return "products";
+        return "category";
     }
     
     @GetMapping("/search")
     public String search(@RequestParam String keyword, Model model, HttpSession session) {
+        System.out.println("=== SEARCH ===");
+        System.out.println("Keyword: " + keyword);
+        
         String username = (String) session.getAttribute("username");
         model.addAttribute("username", username);
         
@@ -173,10 +181,13 @@ public class MainController {
         }
         
         List<Product> products = productService.searchProducts(keyword);
+        System.out.println("Found " + products.size() + " products");
+        
         model.addAttribute("products", products);
         model.addAttribute("keyword", keyword);
+        model.addAttribute("category", "Kết quả tìm kiếm: " + keyword);
         
-        return "products";
+        return "category";
     }
     
     @GetMapping("/my-orders")

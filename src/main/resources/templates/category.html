@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${category} + ' - TapHoaPtit.online'">Danh mục - TapHoaPtit.online</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- Header Top -->
+    <div class="header-top">
+        <div class="container">
+            <div class="info-item">
+                <span>🚚 Miễn phí vận chuyển đơn từ 200k</span>
+                <span style="margin-left: 20px;">📞 Hotline: 1900 1234</span>
+            </div>
+            <div class="user-actions">
+                <div th:if="${username}">
+                    <span class="user-welcome">Xin chào, <strong th:text="${username}">User</strong>! 👋</span>
+                    <a href="/my-orders" class="auth-btn" style="background: rgba(255,255,255,0.2); margin-right: 10px;">📦 Đơn hàng</a>
+                    <a href="/logout" class="auth-btn btn-logout">Đăng xuất</a>
+                </div>
+                <div th:unless="${username}">
+                    <a href="/login" class="auth-btn btn-login">Đăng nhập</a>
+                    <a href="/register" class="auth-btn btn-register">Đăng ký</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Main -->
+    <div class="header-main">
+        <div class="container">
+            <a href="/" class="logo">
+                <span class="logo-icon">🪙</span>
+                <span>TapHoaPtit.online</span>
+            </a>
+            <div class="search-box">
+                <form action="/search" method="get">
+                    <input type="text" name="keyword" placeholder="Tìm kiếm sản phẩm bạn cần..." required>
+                    <button type="submit">🔍</button>
+                </form>
+            </div>
+            <a href="/cart" class="cart-link">
+                🛒
+                <span class="cart-badge" th:if="${cartCount != null && cartCount > 0}" th:text="${cartCount}">0</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Navigation Menu -->
+    <div class="nav-menu">
+        <div class="container">
+            <ul>
+                <li><a href="/">🏠 Trang chủ</a></li>
+                <li><a href="/products/category/Thực phẩm" th:class="${category == 'Thực phẩm' ? 'active' : ''}">🍚 Thực phẩm</a></li>
+                <li><a href="/products/category/Đồ uống" th:class="${category == 'Đồ uống' ? 'active' : ''}">🥤 Đồ uống</a></li>
+                <li><a href="/products/category/Gia vị" th:class="${category == 'Gia vị' ? 'active' : ''}">🧂 Gia vị</a></li>
+                <li><a href="/products/category/Chăm sóc cá nhân" th:class="${category == 'Chăm sóc cá nhân' ? 'active' : ''}">🧴 Chăm sóc cá nhân</a></li>
+                <li><a href="#" style="color: #ff6b6b;">🔥 Khuyến mãi</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Category Header -->
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 0; color: white; text-align: center; margin-bottom: 40px;">
+        <h1 style="font-size: 42px; font-weight: 800; margin-bottom: 15px;" th:text="${category}">Danh mục</h1>
+        <p style="font-size: 18px; opacity: 0.9;">
+            <span th:text="${products.size()}">0</span> sản phẩm có sẵn
+        </p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Products Grid -->
+        <div class="product-grid" th:if="${products.size() > 0}">
+            <div class="product-card" th:each="product : ${products}">
+                <!-- Badge giảm giá -->
+                <div th:if="${product.oldPrice != null}" 
+                     style="position: absolute; top: 10px; left: 10px; background: linear-gradient(135deg, #ff4444, #ff6b6b); color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; z-index: 10; box-shadow: 0 2px 8px rgba(255,68,68,0.3);">
+                    <span th:text="'-' + ${#numbers.formatInteger((1 - product.price / product.oldPrice) * 100, 0)} + '%'">-12%</span>
+                </div>
+                
+                <div class="product-img" th:text="${product.imageUrl}">📦</div>
+                <div class="product-name" th:text="${product.name}">Tên sản phẩm</div>
+                
+                <!-- Rating & Sold -->
+                <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin: 10px 0; font-size: 13px; color: #666;">
+                    <span style="display: flex; align-items: center; gap: 3px;">
+                        ⭐ <strong>4.7</strong>
+                    </span>
+                    <span>Đã bán <strong>856</strong></span>
+                </div>
+                
+                <div class="product-price">
+                    <span th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+                    <span class="old-price" th:if="${product.oldPrice != null}" 
+                          th:text="${#numbers.formatDecimal(product.oldPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                </div>
+                
+                <!-- NẾU ĐÃ ĐĂNG NHẬP -->
+                <form th:if="${username != null}" action="/cart/add" method="post" class="add-to-cart-form">
+                    <input type="hidden" name="productId" th:value="${product.id}">
+                    <input type="hidden" name="quantity" value="1">
+                    <input type="hidden" name="returnUrl" th:value="'/products/category/' + ${category}">
+                    <button type="submit" class="add-cart-btn">
+                        🛒 Thêm vào giỏ
+                    </button>
+                </form>
+                
+                <!-- NẾU CHƯA ĐĂNG NHẬP -->
+                <a th:if="${username == null}" href="/login" class="add-cart-btn" style="display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;">
+                    🔐 Đăng nhập để mua
+                </a>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${products.size() == 0}" style="text-align: center; padding: 80px 20px;">
+            <div style="font-size: 100px; margin-bottom: 20px; opacity: 0.3;">📭</div>
+            <h2 style="color: #666; margin-bottom: 15px;">Không tìm thấy sản phẩm</h2>
+            <p style="color: #999; margin-bottom: 30px;">Danh mục này hiện chưa có sản phẩm nào.</p>
+            <a href="/" style="background: linear-gradient(135deg, #e8342d 0%, #ff6b6b 100%); color: white; padding: 14px 35px; border-radius: 50px; text-decoration: none; font-weight: 700; display: inline-block;">
+                🏠 Về trang chủ
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="container">
+            <div>
+                <h3>🪙 Về TapHoaPtit.online</h3>
+                <p>Tạp hóa trực tuyến hàng đầu Việt Nam</p>
+                <p>Giao hàng nhanh - Giá cả hợp lý</p>
+                <p>Hàng chính hãng - Đảm bảo chất lượng</p>
+            </div>
+            <div>
+                <h3>📋 Hỗ trợ khách hàng</h3>
+                <a href="#">Hướng dẫn mua hàng</a>
+                <a href="#">Chính sách đổi trả</a>
+                <a href="#">Phương thức thanh toán</a>
+                <a href="#">Câu hỏi thường gặp</a>
+            </div>
+            <div>
+                <h3>📞 Liên hệ</h3>
+                <p>Hotline: 1900 1234</p>
+                <p>Email: support@taphoaptit.online</p>
+                <p>Địa chỉ: Hà Nội, Việt Nam</p>
+            </div>
+            <div>
+                <h3>🔗 Theo dõi chúng tôi</h3>
+                <a href="#">Facebook</a>
+                <a href="#">Instagram</a>
+                <a href="#">YouTube</a>
+                <a href="#">TikTok</a>
+            </div>
+        </div>
+        <div class="copyright">
+            © 2025 TapHoaPtit.online - Tạp hóa trực tuyến hàng đầu Việt Nam
+        </div>
+    </div>
+    
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>
