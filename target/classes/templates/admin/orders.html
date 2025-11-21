@@ -191,7 +191,7 @@
             <a href="/admin">Dashboard</a>
             <a href="/admin/products">Sản Phẩm</a>
             <a href="/admin/orders" class="active">Đơn Hàng</a>
-            <a href="/logout" class="btn">Đăng Xuất (${username})</a>
+            <a href="/logout" class="logout-btn" th:text="'Đăng Xuất (' + ${username} + ')'">Đăng Xuất</a>
         </nav>
     </div>
     

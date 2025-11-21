@@ -87,8 +87,17 @@
                      style="position: absolute; top: 10px; left: 10px; background: linear-gradient(135deg, #ff4444, #ff6b6b); color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; z-index: 10; box-shadow: 0 2px 8px rgba(255,68,68,0.3);">
                     <span th:text="'-' + ${#numbers.formatInteger((1 - product.price / product.oldPrice) * 100, 0)} + '%'">-12%</span>
                 </div>
-                
-                <div class="product-img" th:text="${product.imageUrl}">📦</div>
+
+                <div class="product-img">
+                    <img th:if="${product.imageUrl != null and product.imageUrl.contains('.')}"
+                         th:src="@{'/images/' + ${product.imageUrl}}"
+                         alt="Sản phẩm"
+                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+
+                    <span th:unless="${product.imageUrl != null and product.imageUrl.contains('.')}"
+                          th:text="${product.imageUrl}"
+                          style="font-size: 80px; display: block; text-align: center; line-height: 1.5;">📦</span>
+                </div>
                 <div class="product-name" th:text="${product.name}">Tên sản phẩm</div>
                 
                 <!-- Rating & Sold -->
@@ -131,8 +140,17 @@
                      style="position: absolute; top: 10px; left: 10px; background: linear-gradient(135deg, #ff4444, #ff6b6b); color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; z-index: 10; box-shadow: 0 2px 8px rgba(255,68,68,0.3);">
                     <span th:text="'-' + ${#numbers.formatInteger((1 - product.price / product.oldPrice) * 100, 0)} + '%'">-12%</span>
                 </div>
-                
-                <div class="product-img" th:text="${product.imageUrl}">📦</div>
+
+                <div class="product-img">
+                    <img th:if="${product.imageUrl != null and product.imageUrl.contains('.')}"
+                         th:src="@{'/images/' + ${product.imageUrl}}"
+                         alt="Sản phẩm"
+                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+
+                    <span th:unless="${product.imageUrl != null and product.imageUrl.contains('.')}"
+                          th:text="${product.imageUrl}"
+                          style="font-size: 80px; display: block; text-align: center; line-height: 1.5;">📦</span>
+                </div>
                 <div class="product-name" th:text="${product.name}">Tên sản phẩm</div>
                 
                 <!-- Rating & Sold -->

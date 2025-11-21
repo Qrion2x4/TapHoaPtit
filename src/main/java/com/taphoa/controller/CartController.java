@@ -46,10 +46,6 @@ public class CartController {
         List<CartItem> cartItems = cartService.getCartItems(user);
         System.out.println("Cart items count: " + cartItems.size());
         
-        for (CartItem item : cartItems) {
-            System.out.println("  - " + item.getProduct().getName() + " x " + item.getQuantity());
-        }
-        
         Double total = cartService.getCartTotal(user);
         int cartCount = cartService.getCartCount(user);
         
@@ -70,11 +66,9 @@ public class CartController {
         Long userId = (Long) session.getAttribute("userId");
         
         System.out.println("=== ADD TO CART ===");
-        System.out.println("Session ID: " + session.getId());
-        System.out.println("User ID from session: " + userId);
+        System.out.println("User ID: " + userId);
         System.out.println("Product ID: " + productId);
         System.out.println("Quantity: " + quantity);
-        System.out.println("Return URL: " + returnUrl);
         
         if (userId == null) {
             System.out.println("ERROR: User not logged in!");
@@ -89,18 +83,15 @@ public class CartController {
                 return "redirect:/login";
             }
             
-            System.out.println("User found: " + user.getUsername() + " (ID: " + user.getId() + ")");
+            System.out.println("User found: " + user.getUsername());
             
-            // THÊM VÀO GIỎ HÀNG NGAY
             cartService.addToCart(user, productId, quantity);
             System.out.println("Added to cart successfully!");
             
-            // Lấy số lượng mới trong giỏ
             int newCartCount = cartService.getCartCount(user);
             System.out.println("New cart count: " + newCartCount);
             
             redirectAttributes.addFlashAttribute("success", "Đã thêm sản phẩm vào giỏ hàng!");
-            redirectAttributes.addFlashAttribute("cartCount", newCartCount);
             
         } catch (Exception e) {
             System.out.println("ERROR adding to cart: " + e.getMessage());
@@ -108,15 +99,79 @@ public class CartController {
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
         }
         
-        // Redirect về trang trước đó hoặc trang chủ
         if (returnUrl != null && !returnUrl.isEmpty()) {
             return "redirect:" + returnUrl;
         }
         return "redirect:/";
     }
     
+    /**
+     * TĂNG SỐ LƯỢNG
+     */
+    @PostMapping("/increase/{id}")
+    public String increaseQuantity(@PathVariable Long id, 
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            System.out.println("=== INCREASE QUANTITY ===");
+            System.out.println("Cart Item ID: " + id);
+            
+            CartItem item = cartService.getCartItemById(id);
+            if (item == null) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy sản phẩm!");
+                return "redirect:/cart";
+            }
+            
+            int newQuantity = item.getQuantity() + 1;
+            cartService.updateQuantity(id, newQuantity);
+            
+            System.out.println("✅ Increased: " + item.getQuantity() + " → " + newQuantity);
+            
+        } catch (Exception e) {
+            System.out.println("❌ ERROR: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra!");
+        }
+        
+        return "redirect:/cart";
+    }
+    
+    /**
+     * GIẢM SỐ LƯỢNG
+     */
+    @PostMapping("/decrease/{id}")
+    public String decreaseQuantity(@PathVariable Long id,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            System.out.println("=== DECREASE QUANTITY ===");
+            System.out.println("Cart Item ID: " + id);
+            
+            CartItem item = cartService.getCartItemById(id);
+            if (item == null) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy sản phẩm!");
+                return "redirect:/cart";
+            }
+            
+            // Nếu quantity = 1, xóa luôn
+            if (item.getQuantity() <= 1) {
+                cartService.removeFromCart(id);
+                System.out.println("✅ Removed item (quantity was 1)");
+                redirectAttributes.addFlashAttribute("success", "Đã xóa sản phẩm khỏi giỏ!");
+            } else {
+                int newQuantity = item.getQuantity() - 1;
+                cartService.updateQuantity(id, newQuantity);
+                System.out.println("✅ Decreased: " + item.getQuantity() + " → " + newQuantity);
+            }
+            
+        } catch (Exception e) {
+            System.out.println("❌ ERROR: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra!");
+        }
+        
+        return "redirect:/cart";
+    }
+    
     @PostMapping("/remove/{id}")
-    public String removeFromCart(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String removeFromCart(@PathVariable Long id, 
+                                 RedirectAttributes redirectAttributes) {
         try {
             System.out.println("=== REMOVE FROM CART ===");
             System.out.println("Cart Item ID: " + id);
@@ -138,6 +193,11 @@ public class CartController {
             System.out.println("=== UPDATE CART ===");
             System.out.println("Cart Item ID: " + id);
             System.out.println("New Quantity: " + quantity);
+            
+            if (quantity < 1) {
+                redirectAttributes.addFlashAttribute("error", "Số lượng không hợp lệ!");
+                return "redirect:/cart";
+            }
             
             cartService.updateQuantity(id, quantity);
             redirectAttributes.addFlashAttribute("success", "Đã cập nhật số lượng!");

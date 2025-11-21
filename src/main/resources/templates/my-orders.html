@@ -539,7 +539,16 @@
                     <div class="order-items">
                         <h4>📋 Sản phẩm đã đặt:</h4>
                         <div class="order-item" th:each="item : ${order.orderItems}">
-                            <div class="item-icon" th:text="${item.product.imageUrl}">🍚</div>
+                            <div class="item-icon" style="width: 60px; height: 60px; overflow: hidden; border-radius: 5px; border: 1px solid #eee; display: flex; align-items: center; justify-content: center;">
+                                <img th:if="${item.product.imageUrl != null and item.product.imageUrl.contains('.')}"
+                                     th:src="@{'/images/' + ${item.product.imageUrl}}"
+                                     alt="SP"
+                                     style="width: 100%; height: 100%; object-fit: cover;">
+
+                                <span th:unless="${item.product.imageUrl != null and item.product.imageUrl.contains('.')}"
+                                      th:text="${item.product.imageUrl}"
+                                      style="font-size: 30px;">🍚</span>
+                            </div>
                             <div class="item-details">
                                 <div class="item-name" th:text="${item.product.name}">Gạo ST25</div>
                                 <div class="item-price">
