@@ -89,26 +89,48 @@
                     
                     <div class="item-details">
                         <div class="item-name" th:text="${item.product.name}">Tên sản phẩm</div>
-                        <div class="item-price" th:data-price="${item.product.price}" 
+                        <div class="item-price" 
                              th:text="${#numbers.formatDecimal(item.product.price, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</div>
                         
                         <div class="item-actions">
                             <div class="item-quantity">
-                                <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post" style="display:inline;">
-                                    <button type="button" class="quantity-btn decrease-btn" th:data-id="${item.id}">−</button>
-                                    <input type="number" name="quantity" th:value="${item.quantity}" min="1" th:id="'qty-' + ${item.id}" readonly>
-                                    <button type="button" class="quantity-btn increase-btn" th:data-id="${item.id}">+</button>
+                                <!-- NÚT GIẢM -->
+                                <form th:action="@{/cart/decrease/{id}(id=${item.id})}" 
+                                      method="post" 
+                                      style="display:inline;">
+                                    <button type="submit" 
+                                            class="quantity-btn decrease-btn"
+                                            th:disabled="${item.quantity <= 1}">
+                                        −
+                                    </button>
+                                </form>
+                                
+                                <!-- HIỂN THỊ SỐ LƯỢNG -->
+                                <span class="quantity-display" th:text="${item.quantity}">1</span>
+                                
+                                <!-- NÚT TĂNG -->
+                                <form th:action="@{/cart/increase/{id}(id=${item.id})}" 
+                                      method="post" 
+                                      style="display:inline;">
+                                    <button type="submit" class="quantity-btn increase-btn">
+                                        +
+                                    </button>
                                 </form>
                             </div>
                             
-                            <form th:action="@{/cart/remove/{id}(id=${item.id})}" method="post" style="display:inline;">
+                            <!-- NÚT XÓA -->
+                            <form th:action="@{/cart/remove/{id}(id=${item.id})}" 
+                                  method="post" 
+                                  style="display:inline;"
+                                  onsubmit="return confirm('Xóa sản phẩm này khỏi giỏ hàng?')">
                                 <button type="submit" class="remove-btn">🗑️ Xóa</button>
                             </form>
                         </div>
                     </div>
                     
                     <div class="item-right">
-                        <div class="item-total" th:text="${#numbers.formatDecimal(item.product.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</div>
+                        <div class="item-total" 
+                             th:text="${#numbers.formatDecimal(item.product.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</div>
                     </div>
                 </div>
             </div>
@@ -212,8 +234,8 @@
         </div>
     </div>
     
-    <script th:src="@{/js/cart.js}"></script>
     <script>
+        // Modal functions
         function openOrderModal() {
             const modal = document.getElementById('orderModal');
             if (modal) {
@@ -235,6 +257,31 @@
                 closeOrderModal();
             }
         });
+        
+        // Form validation
+        const orderForm = document.getElementById('orderForm');
+        if (orderForm) {
+            orderForm.addEventListener('submit', function(e) {
+                const phone = document.getElementById('phone').value.trim();
+                const address = document.getElementById('address').value.trim();
+                
+                if (!phone || !address) {
+                    e.preventDefault();
+                    alert('Vui lòng điền đầy đủ thông tin!');
+                    return false;
+                }
+                
+                // Validate phone
+                const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
+                if (!phoneRegex.test(phone)) {
+                    e.preventDefault();
+                    alert('Số điện thoại không hợp lệ!');
+                    return false;
+                }
+                
+                return true;
+            });
+        }
     </script>
 </body>
 </html>

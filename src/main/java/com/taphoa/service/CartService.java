@@ -36,6 +36,21 @@ public class CartService {
         return count;
     }
     
+    /**
+     * LẤY CART ITEM THEO ID
+     */
+    public CartItem getCartItemById(Long id) {
+        System.out.println("Getting cart item by ID: " + id);
+        Optional<CartItem> item = cartItemRepository.findById(id);
+        if (item.isPresent()) {
+            System.out.println("✅ Found: " + item.get().getProduct().getName());
+            return item.get();
+        } else {
+            System.out.println("❌ Not found");
+            return null;
+        }
+    }
+    
     @Transactional
     public void addToCart(User user, Long productId, Integer quantity) {
         System.out.println("=== CartService.addToCart ===");
@@ -59,10 +74,8 @@ public class CartService {
             int oldQuantity = item.getQuantity();
             item.setQuantity(oldQuantity + quantity);
             
-            // SAVE VÀO DATABASE NGAY
             CartItem saved = cartItemRepository.saveAndFlush(item);
             System.out.println("Updated quantity from " + oldQuantity + " to " + saved.getQuantity());
-            System.out.println("Saved item ID: " + saved.getId());
         } else {
             System.out.println("Creating new cart item");
             CartItem item = new CartItem();
@@ -70,17 +83,13 @@ public class CartService {
             item.setProduct(product);
             item.setQuantity(quantity);
             
-            // SAVE VÀO DATABASE NGAY
             CartItem saved = cartItemRepository.saveAndFlush(item);
             System.out.println("Saved new cart item with ID: " + saved.getId());
         }
         
-        // Verify save
+        // Verify
         List<CartItem> allItems = cartItemRepository.findByUser(user);
         System.out.println("Total items in cart now: " + allItems.size());
-        for (CartItem item : allItems) {
-            System.out.println("  - " + item.getProduct().getName() + " x " + item.getQuantity());
-        }
     }
     
     @Transactional
@@ -88,19 +97,22 @@ public class CartService {
         System.out.println("Removing cart item ID: " + cartItemId);
         cartItemRepository.deleteById(cartItemId);
         cartItemRepository.flush();
-        System.out.println("Removed successfully");
+        System.out.println("✅ Removed successfully");
     }
     
     @Transactional
     public void updateQuantity(Long cartItemId, Integer quantity) {
         System.out.println("Updating cart item ID: " + cartItemId + " to quantity: " + quantity);
-        CartItem item = cartItemRepository.findById(cartItemId).orElse(null);
-        if (item != null) {
+        
+        Optional<CartItem> itemOpt = cartItemRepository.findById(cartItemId);
+        if (itemOpt.isPresent()) {
+            CartItem item = itemOpt.get();
             item.setQuantity(quantity);
             cartItemRepository.saveAndFlush(item);
-            System.out.println("Updated successfully");
+            System.out.println("✅ Updated successfully");
         } else {
-            System.out.println("Cart item not found!");
+            System.out.println("❌ Cart item not found!");
+            throw new RuntimeException("Không tìm thấy sản phẩm trong giỏ!");
         }
     }
     
@@ -109,6 +121,7 @@ public class CartService {
         System.out.println("Clearing cart for user: " + user.getUsername());
         cartItemRepository.deleteByUser(user);
         cartItemRepository.flush();
+        System.out.println("✅ Cart cleared");
     }
     
     public Double getCartTotal(User user) {

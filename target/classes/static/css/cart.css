@@ -1,4 +1,5 @@
-/* ==================== PAGE TITLE ==================== */
+/* ==================== CART PAGE STYLES ==================== */
+
 .page-title {
     font-size: 32px;
     margin-bottom: 30px;
@@ -9,17 +10,6 @@
     justify-content: space-between;
     gap: 15px;
     flex-wrap: wrap;
-}
-
-@keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .cart-badge-summary {
@@ -38,11 +28,6 @@
     grid-template-columns: 1fr 400px;
     gap: 30px;
     animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
 }
 
 /* ==================== CART ITEMS SECTION ==================== */
@@ -71,18 +56,6 @@
     padding: 25px 0;
     border-bottom: 1px solid #f0f0f0;
     transition: all 0.3s;
-    animation: slideInLeft 0.5s ease;
-}
-
-@keyframes slideInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
 }
 
 .cart-item:hover {
@@ -146,39 +119,54 @@
     display: flex;
     align-items: center;
     gap: 20px;
+    flex-wrap: wrap;
 }
 
+/* QUANTITY CONTROLS */
 .item-quantity {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 15px;
     background: #f8f9fa;
-    padding: 8px 12px;
+    padding: 8px 15px;
     border-radius: 50px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.quantity-display {
+    min-width: 50px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 800;
+    color: #333;
 }
 
 .quantity-btn {
     background: linear-gradient(135deg, #e8342d 0%, #ff6b6b 100%);
     color: white;
     border: none;
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: bold;
     transition: all 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 2px 8px rgba(232, 52, 45, 0.3);
+    line-height: 1;
 }
 
-.quantity-btn:hover {
+.quantity-btn:hover:not(:disabled) {
     background: linear-gradient(135deg, #d02a23 0%, #ff4444 100%);
     transform: scale(1.15);
     box-shadow: 0 4px 15px rgba(232, 52, 45, 0.4);
+}
+
+.quantity-btn:active:not(:disabled) {
+    transform: scale(1.05);
 }
 
 .quantity-btn:disabled {
@@ -186,17 +174,7 @@
     cursor: not-allowed;
     transform: scale(1);
     box-shadow: none;
-}
-
-.item-quantity input {
-    width: 60px;
-    padding: 10px;
-    text-align: center;
-    border: none;
-    background: transparent;
-    font-weight: 800;
-    font-size: 18px;
-    color: #333;
+    opacity: 0.5;
 }
 
 .remove-btn {
@@ -239,21 +217,9 @@
     border-radius: 20px;
     padding: 30px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    animation: fadeInUp 0.5s ease 0.2s backwards;
     position: sticky;
     top: 120px;
     height: fit-content;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .cart-summary h3 {
@@ -379,7 +345,6 @@
     background: white;
     border-radius: 20px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    animation: fadeIn 0.5s ease;
 }
 
 .empty-cart-icon {
@@ -426,7 +391,7 @@
     box-shadow: 0 10px 30px rgba(232, 52, 45, 0.4);
 }
 
-/* ==================== MODAL STYLES ==================== */
+/* ==================== MODAL ==================== */
 .modal {
     position: fixed;
     top: 0;
@@ -437,7 +402,6 @@
     display: none;
     align-items: center;
     justify-content: center;
-    animation: fadeIn 0.3s ease;
 }
 
 .modal-overlay {
@@ -459,19 +423,7 @@
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
-    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 10000;
-}
-
-@keyframes slideUp {
-    from {
-        transform: translateY(100px) scale(0.9);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-    }
 }
 
 .modal-header {
@@ -480,8 +432,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
-    border-radius: 25px 25px 0 0;
 }
 
 .modal-header h2 {
@@ -504,14 +454,13 @@
     justify-content: center;
     border-radius: 50%;
     transition: all 0.3s;
-    font-weight: 300;
     line-height: 1;
 }
 
 .modal-close:hover {
     background: #e74c3c;
     color: white;
-    transform: rotate(90deg) scale(1.1);
+    transform: rotate(90deg);
 }
 
 #orderForm {
@@ -532,7 +481,6 @@
 
 .required {
     color: #e74c3c;
-    font-size: 16px;
 }
 
 .form-group input,
@@ -568,20 +516,6 @@
     border: 3px solid #ffcccc;
 }
 
-.order-summary-modal .summary-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 18px;
-    font-weight: 700;
-}
-
-.order-summary-modal .total-price {
-    color: #e8342d;
-    font-size: 32px;
-    font-weight: 800;
-}
-
 .modal-actions {
     display: flex;
     gap: 15px;
@@ -598,7 +532,6 @@
     cursor: pointer;
     transition: all 0.3s;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 .btn-cancel {
@@ -610,7 +543,6 @@
 .btn-cancel:hover {
     background: #e9ecef;
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
 .btn-confirm {
@@ -620,7 +552,6 @@
 }
 
 .btn-confirm:hover {
-    background: linear-gradient(135deg, #229954 0%, #1e8449 100%);
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(39, 174, 96, 0.5);
 }
@@ -633,7 +564,6 @@
     
     .cart-summary {
         position: static;
-        margin-top: 20px;
     }
     
     .cart-item {
@@ -653,5 +583,11 @@
         justify-content: space-between;
         align-items: center;
         margin-top: 15px;
+    }
+    
+    .item-actions {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
     }
 }
