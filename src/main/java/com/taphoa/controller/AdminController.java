@@ -3,6 +3,7 @@ package com.taphoa.controller;
 import com.taphoa.entity.Order;
 import com.taphoa.entity.Product;
 import com.taphoa.entity.User;
+import com.taphoa.repository.OrderRepository;
 import com.taphoa.service.OrderService;
 import com.taphoa.service.ProductService;
 import com.taphoa.service.UserService;
@@ -31,6 +32,9 @@ public class AdminController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     private boolean isAdmin(HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
@@ -108,10 +112,24 @@ public class AdminController {
         }
 
         try {
-            orderService.updateOrderStatus(id, status);
-            redirectAttributes.addFlashAttribute("success", "Cập nhật trạng thái đơn hàng thành công!");
+
+            Order order = orderRepository.findById(id).orElse(null);
+
+            if (order != null) {
+
+                order.setStatus(status);
+
+
+                orderRepository.save(order);
+
+                System.out.println("Đã cập nhật đơn hàng #" + id + " sang trạng thái: " + status);
+                redirectAttributes.addFlashAttribute("success", "Cập nhật trạng thái thành công!");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy đơn hàng!");
+            }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra!");
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }
 
         return "redirect:/admin/orders";
