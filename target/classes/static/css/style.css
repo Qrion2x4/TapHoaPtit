@@ -716,3 +716,32 @@ body {
         font-size: 28px;
     }
 }
+/* ==================== MÔ TẢ SẢN PHẨM NGẮN ==================== */
+.product-description-short {
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin: 15px 0;
+    min-height: 60px;
+}
+
+.product-description-short p {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.5;
+    margin: 0;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Hiển thị tối đa 2 dòng */
+    -webkit-box-orient: vertical;
+}
+
+/* Đảm bảo card đồng đều */
+.product-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 480px;
+}
