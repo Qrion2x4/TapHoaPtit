@@ -56,7 +56,7 @@
         <div class="container">
             <ul>
                 <li><a href="/" class="active">🏠 Trang chủ</a></li>
-                <li><a href="/products/category/Thực phẩm">🍚 Thực phẩm</a></li>
+                <li><a href="/products/category/Thực phẩm">🌾 Thực phẩm</a></li>
                 <li><a href="/products/category/Đồ uống">🥤 Đồ uống</a></li>
                 <li><a href="/products/category/Gia vị">🧂 Gia vị</a></li>
                 <li><a href="/products/category/Chăm sóc cá nhân">🧴 Chăm sóc cá nhân</a></li>
@@ -78,11 +78,10 @@
             <span th:text="${success}"></span>
         </div>
         
-        <!-- Sản phẩm nổi bật -->
+        <!-- SẢN PHẨM NỔI BẬT -->
         <h2 class="section-title">🔥 Sản phẩm nổi bật</h2>
         <div class="product-grid">
             <div class="product-card" th:each="product : ${featuredProducts}">
-                <!-- Badge giảm giá -->
                 <div th:if="${product.oldPrice != null}" 
                      style="position: absolute; top: 10px; left: 10px; background: linear-gradient(135deg, #ff4444, #ff6b6b); color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; z-index: 10; box-shadow: 0 2px 8px rgba(255,68,68,0.3);">
                     <span th:text="'-' + ${#numbers.formatInteger((1 - product.price / product.oldPrice) * 100, 0)} + '%'">-12%</span>
@@ -98,9 +97,14 @@
                           th:text="${product.imageUrl}"
                           style="font-size: 80px; display: block; text-align: center; line-height: 1.5;">📦</span>
                 </div>
+                
                 <div class="product-name" th:text="${product.name}">Tên sản phẩm</div>
                 
-                <!-- Rating & Sold -->
+                <div class="product-description-short" 
+                     th:if="${product.description != null and !product.description.isEmpty()}">
+                    <p th:text="${#strings.abbreviate(product.description, 80)}">Mô tả ngắn sản phẩm...</p>
+                </div>
+                
                 <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin: 10px 0; font-size: 13px; color: #666;">
                     <span style="display: flex; align-items: center; gap: 3px;">
                         ⭐ <strong>4.8</strong>
@@ -114,7 +118,7 @@
                           th:text="${#numbers.formatDecimal(product.oldPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
                 </div>
                 
-                <!-- NẾU ĐÃ ĐĂNG NHẬP -->
+                <!-- ✅ THÊM CLASS add-to-cart-form -->
                 <form th:if="${username != null}" action="/cart/add" method="post" class="add-to-cart-form">
                     <input type="hidden" name="productId" th:value="${product.id}">
                     <input type="hidden" name="quantity" value="1">
@@ -124,18 +128,16 @@
                     </button>
                 </form>
                 
-                <!-- NẾU CHƯA ĐĂNG NHẬP -->
                 <a th:if="${username == null}" href="/login" class="add-cart-btn" style="display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;">
-                    🔐 Đăng nhập để mua
+                    🔒 Đăng nhập để mua
                 </a>
             </div>
         </div>
 
-        <!-- Tất cả sản phẩm -->
+        <!-- TẤT CẢ SẢN PHẨM -->
         <h2 class="section-title">🛒 Tất cả sản phẩm</h2>
         <div class="product-grid">
             <div class="product-card" th:each="product : ${allProducts}">
-                <!-- Badge giảm giá -->
                 <div th:if="${product.oldPrice != null}" 
                      style="position: absolute; top: 10px; left: 10px; background: linear-gradient(135deg, #ff4444, #ff6b6b); color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; z-index: 10; box-shadow: 0 2px 8px rgba(255,68,68,0.3);">
                     <span th:text="'-' + ${#numbers.formatInteger((1 - product.price / product.oldPrice) * 100, 0)} + '%'">-12%</span>
@@ -151,9 +153,14 @@
                           th:text="${product.imageUrl}"
                           style="font-size: 80px; display: block; text-align: center; line-height: 1.5;">📦</span>
                 </div>
+                
                 <div class="product-name" th:text="${product.name}">Tên sản phẩm</div>
                 
-                <!-- Rating & Sold -->
+                <div class="product-description-short" 
+                     th:if="${product.description != null and !product.description.isEmpty()}">
+                    <p th:text="${#strings.abbreviate(product.description, 80)}">Mô tả ngắn sản phẩm...</p>
+                </div>
+                
                 <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin: 10px 0; font-size: 13px; color: #666;">
                     <span style="display: flex; align-items: center; gap: 3px;">
                         ⭐ <strong>4.7</strong>
@@ -167,7 +174,7 @@
                           th:text="${#numbers.formatDecimal(product.oldPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
                 </div>
                 
-                <!-- NẾU ĐÃ ĐĂNG NHẬP -->
+                <!-- ✅ THÊM CLASS add-to-cart-form -->
                 <form th:if="${username != null}" action="/cart/add" method="post" class="add-to-cart-form">
                     <input type="hidden" name="productId" th:value="${product.id}">
                     <input type="hidden" name="quantity" value="1">
@@ -177,9 +184,8 @@
                     </button>
                 </form>
                 
-                <!-- NẾU CHƯA ĐĂNG NHẬP -->
                 <a th:if="${username == null}" href="/login" class="add-cart-btn" style="display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;">
-                    🔐 Đăng nhập để mua
+                    🔒 Đăng nhập để mua
                 </a>
             </div>
         </div>

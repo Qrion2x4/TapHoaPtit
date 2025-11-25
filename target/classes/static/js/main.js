@@ -1,4 +1,4 @@
-/* ==================== MAIN.JS - ENHANCED ==================== */
+/* ==================== MAIN.JS - ENHANCED WITH AJAX ADD TO CART ==================== */
 
 // ==================== SMOOTH SCROLL ====================
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -14,26 +14,83 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// ==================== ADD TO CART WITH ANIMATION ====================
+// ==================== AJAX ADD TO CART - MỚI (JSON API) ==================== 
 document.querySelectorAll('.add-to-cart-form').forEach(form => {
     form.addEventListener('submit', function(e) {
+        e.preventDefault(); // Chặn submit form bình thường
+        
         const btn = this.querySelector('.add-cart-btn');
         const originalText = btn.innerHTML;
         
-        // Animation effect
-// Animation effect
-        btn.innerHTML = '<span style="display: inline-block; animation: spin 0.5s linear;">⏳</span> Đang thêm...';
+        // Lấy productId từ form
+        const productId = this.querySelector('input[name="productId"]').value;
+        const quantity = this.querySelector('input[name="quantity"]').value || 1;
+        
+        // Hiển thị loading
+        btn.innerHTML = '⏳ Đang thêm...';
         btn.disabled = true;
         btn.style.opacity = '0.7';
         
-        // Animate cart icon
-        const cartIcon = document.querySelector('.cart-link');
-        if (cartIcon) {
-            cartIcon.style.animation = 'pulse 0.5s ease';
-            setTimeout(() => {
-                cartIcon.style.animation = '';
-            }, 500);
-        }
+        // ✅ GỌI API JSON
+        fetch('/api/cart/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `productId=${productId}&quantity=${quantity}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Response:', data);
+            
+            if (data.success) {
+                // ✅ Cập nhật badge với số mới từ server
+                const currentCartBadge = document.querySelector('.cart-badge');
+                const cartLink = document.querySelector('.cart-link');
+                
+                if (currentCartBadge) {
+                    currentCartBadge.textContent = data.cartCount;
+                    currentCartBadge.style.animation = 'pulse 0.5s ease';
+                    setTimeout(() => {
+                        currentCartBadge.style.animation = '';
+                    }, 500);
+                } else if (data.cartCount > 0) {
+                    // Tạo badge mới nếu chưa có
+                    const badge = document.createElement('span');
+                    badge.className = 'cart-badge';
+                    badge.textContent = data.cartCount;
+                    cartLink.appendChild(badge);
+                }
+                
+                // Animation cart icon
+                if (cartLink) {
+                    cartLink.style.animation = 'pulse 0.5s ease';
+                    setTimeout(() => {
+                        cartLink.style.animation = '';
+                    }, 500);
+                }
+                
+                // Hiển thị toast thành công
+                showToast(data.message || '✅ Đã thêm sản phẩm vào giỏ hàng!', 'success');
+            } else {
+                // Hiển thị lỗi từ server
+                showToast(data.message || '❌ Có lỗi xảy ra!', 'error');
+            }
+            
+            // Reset button
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('❌ Có lỗi xảy ra, vui lòng thử lại!', 'error');
+            
+            // Reset button
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        });
     });
 });
 
@@ -179,14 +236,10 @@ document.querySelectorAll('.product-card').forEach(card => {
 // ==================== TOAST NOTIFICATION ====================
 function showToast(message, type = 'success') {
     // Remove existing toasts
-    document.querySelectorAll('.toast').forEach(t => {
-        if (t.parentElement && t.parentElement.style.position === 'fixed') {
-            t.remove();
-        }
-    });
+    document.querySelectorAll('.toast-notification').forEach(t => t.remove());
     
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
+    toast.className = `toast-notification ${type}`;
     toast.style.cssText = `
         position: fixed;
         top: 100px;
@@ -235,6 +288,11 @@ function showToast(message, type = 'success') {
 // ==================== FORM VALIDATION ====================
 const forms = document.querySelectorAll('form');
 forms.forEach(form => {
+    // Skip add-to-cart forms vì đã xử lý AJAX ở trên
+    if (form.classList.contains('add-to-cart-form')) {
+        return;
+    }
+    
     form.addEventListener('submit', function(e) {
         const inputs = this.querySelectorAll('input[required]');
         let isValid = true;
@@ -350,7 +408,7 @@ if (cartBadge) {
     });
 }
 
-// ==================== SEARCH SUGGESTIONS (Optional Enhancement) ====================
+// ==================== SEARCH SUGGESTIONS ====================
 const searchSuggestions = ['Gạo', 'Trứng', 'Sữa', 'Bánh mì', 'Dầu ăn', 'Mì gói', 'Coca Cola', 'Kem đánh răng'];
 
 if (searchInput) {
@@ -426,9 +484,9 @@ window.addEventListener('load', () => {
     });
 });
 
-// ==================== ADD SHAKE ANIMATION ====================
-const shakeStyle = document.createElement('style');
-shakeStyle.textContent = `
+// ==================== ADD ANIMATION STYLES ====================
+const animationStyles = document.createElement('style');
+animationStyles.textContent = `
     @keyframes shake {
         0%, 100% { transform: translateX(0); }
         25% { transform: translateX(-10px); }
@@ -450,29 +508,34 @@ shakeStyle.textContent = `
             opacity: 0;
         }
     }
+    
+    @keyframes scaleIn {
+        from {
+            transform: scale(0.9);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
 `;
-document.head.appendChild(shakeStyle);
+document.head.appendChild(animationStyles);
 
 // ==================== CONSOLE WELCOME MESSAGE ====================
-console.log('%c🏪 TapHoaPtit.online', 'font-size: 24px; font-weight: bold; color: #e8342d;');
+console.log('%c🪙 TapHoaPtit.online', 'font-size: 24px; font-weight: bold; color: #e8342d;');
 console.log('%cChào mừng đến với tạp hóa trực tuyến số 1 Việt Nam!', 'font-size: 14px; color: #666;');
 console.log('%c💻 Developed with ❤️', 'font-size: 12px; color: #27ae60;');
-
-// ==================== DEBUG MODE (Development only) ====================
-if (window.location.hostname === 'localhost') {
-    console.log('%c🔧 Debug Mode Enabled', 'background: #ff6b6b; color: white; padding: 5px 10px; border-radius: 5px;');
-    
-    // Log all form submissions
-    document.querySelectorAll('form').forEach(form => {
-        form.addEventListener('submit', (e) => {
-            console.log('Form submitted:', {
-                action: form.action,
-                method: form.method,
-                data: new FormData(form)
-            });
-        });
-    });
-}
 
 // ==================== PERFORMANCE OPTIMIZATION ====================
 // Debounce function for scroll events
@@ -495,4 +558,4 @@ const debouncedScroll = debounce(() => {
 
 window.addEventListener('scroll', debouncedScroll);
 
-console.log('✅ Main.js loaded successfully!');
+console.log('✅ Main.js loaded successfully with AJAX support!');
