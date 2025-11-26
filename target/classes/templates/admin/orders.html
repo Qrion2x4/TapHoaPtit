@@ -252,7 +252,7 @@
                 </td>
                 <td>
                     <div class="action-group">
-                        <a href="#" class="btn-detail">👁️ Xem chi tiết</a>
+
                         <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="status-form">
                             <select name="status" class="status-select">
                                 <option value="PENDING" th:selected="${order.status == 'PENDING'}">Chờ xử lý</option>
