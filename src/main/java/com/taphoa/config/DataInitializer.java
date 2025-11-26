@@ -4,6 +4,7 @@ import com.taphoa.entity.Product;
 import com.taphoa.entity.User;
 import com.taphoa.repository.ProductRepository;
 import com.taphoa.repository.UserRepository;
+import com.taphoa.service.CouponService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,7 +17,10 @@ public class DataInitializer implements CommandLineRunner {
     private ProductRepository productRepository;
     
     @Autowired
-    private UserRepository userRepository;  // ← THÊM DÒNG NÀY
+    private UserRepository userRepository;
+    
+    @Autowired
+    private CouponService couponService;
     
     @Override
     public void run(String... args) {
@@ -24,7 +28,6 @@ public class DataInitializer implements CommandLineRunner {
         System.out.println("🚀 Starting Data Initialization...");
         System.out.println("===========================================");
         
-        // Tạo password encoder
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         
         // ============ TẠO TÀI KHOẢN ADMIN ============
@@ -47,12 +50,18 @@ public class DataInitializer implements CommandLineRunner {
         
         System.out.println("-------------------------------------------");
         
+        // ============ TẠO MÃ GIẢM GIÁ NEWBIE ============
+        couponService.createNewbieCoupon();
+        System.out.println("✓ NEWBIE coupon ready (10% off, max 50k)");
+        
+        System.out.println("-------------------------------------------");
+        
         // ============ TẠO SẢN PHẨM MẪU ============
         if (productRepository.count() == 0) {
             System.out.println("📦 Creating sample products...");
             
             // Sản phẩm nổi bật
-            addProduct("Gạo ST25 túi 5kg", 119000.0, 135000.0, "🍚", "Thực phẩm", true);
+            addProduct("Gạo ST25 túi 5kg", 119000.0, 135000.0, "🌾", "Thực phẩm", true);
             addProduct("Trứng gà tươi (10 quả)", 34000.0, null, "🥚", "Thực phẩm", true);
             addProduct("Sữa tươi Vinamilk 1L", 39000.0, null, "🥛", "Đồ uống", true);
             addProduct("Bánh mì sandwich", 26000.0, null, "🍞", "Thực phẩm", true);
@@ -100,6 +109,9 @@ public class DataInitializer implements CommandLineRunner {
         System.out.println("📌 LOGIN CREDENTIALS:");
         System.out.println("   Admin: admin / admin123");
         System.out.println("   URL: http://localhost:8080/admin");
+        System.out.println();
+        System.out.println("🎁 COUPON CODE:");
+        System.out.println("   NEWBIE - Giảm 10% (tối đa 50k, đơn tối thiểu 100k)");
         System.out.println();
         System.out.println("🏠 Website: http://localhost:8080");
         System.out.println("===========================================");
