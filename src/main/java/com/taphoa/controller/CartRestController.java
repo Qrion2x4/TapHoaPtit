@@ -4,6 +4,7 @@ import com.taphoa.entity.CartItem;
 import com.taphoa.entity.User;
 import com.taphoa.service.CartService;
 import com.taphoa.service.UserService;
+import com.taphoa.service.CouponService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,9 @@ public class CartRestController {
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private CouponService couponService;
     
     /**
      * ✅ API MỚI: THÊM VÀO GIỎ HÀNG (AJAX)
@@ -163,24 +167,12 @@ public class CartRestController {
                 return ResponseEntity.status(403).body(createErrorResponse("Không có quyền!"));
             }
             
-            // Nếu quantity = 1, xóa luôn
+            // ✅ NẾU quantity = 1, KHÔNG CHO GIẢM
             if (item.getQuantity() <= 1) {
-                cartService.removeFromCart(id);
-                
-                System.out.println("✅ Removed item (quantity was 1)");
-                
-                User user = userService.getUserById(userId);
-                Double newTotal = cartService.getCartTotal(user);
-                int newCartCount = cartService.getCartCount(user);
-                
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", true);
-                response.put("removed", true);
-                response.put("cartTotal", newTotal);
-                response.put("cartCount", newCartCount);
-                response.put("message", "Đã xóa sản phẩm khỏi giỏ!");
-                
-                return ResponseEntity.ok(response);
+                System.out.println("❌ Quantity is 1, cannot decrease. Use remove instead!");
+                return ResponseEntity.badRequest().body(
+                    createErrorResponse("Số lượng tối thiểu là 1. Vui lòng dùng nút Xóa để xóa sản phẩm!")
+                );
             }
             
             // Giảm số lượng
@@ -256,6 +248,53 @@ public class CartRestController {
             response.put("message", "Đã xóa sản phẩm!");
             
             return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            System.out.println("❌ ERROR: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(createErrorResponse("Có lỗi xảy ra: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * ✅ API MỚI: KIỂM TRA MÃ GIẢM GIÁ
+     * URL: POST /api/cart/apply-coupon
+     */
+    @PostMapping("/apply-coupon")
+    public ResponseEntity<?> applyCoupon(@RequestParam String code,
+                                        @RequestParam Double orderTotal,
+                                        HttpSession session) {
+        try {
+            System.out.println("=== API: APPLY COUPON ===");
+            System.out.println("Code: " + code);
+            System.out.println("Order Total (Selected Items): " + orderTotal);
+            
+            // Kiểm tra đăng nhập
+            Long userId = (Long) session.getAttribute("userId");
+            if (userId == null) {
+                return ResponseEntity.status(401).body(createErrorResponse("Vui lòng đăng nhập!"));
+            }
+            
+            User user = userService.getUserById(userId);
+            if (user == null) {
+                return ResponseEntity.status(401).body(createErrorResponse("Không tìm thấy người dùng!"));
+            }
+            
+            // Validate coupon với orderTotal từ frontend (chỉ tính sản phẩm đã chọn)
+            Map<String, Object> result = couponService.validateCoupon(code.toUpperCase().trim(), user, orderTotal);
+            
+            if ((Boolean) result.get("valid")) {
+                // Lưu vào session để dùng khi đặt hàng
+                session.setAttribute("appliedCoupon", result.get("coupon"));
+                session.setAttribute("discountAmount", result.get("discount"));
+                
+                System.out.println("✅ Coupon applied successfully! Discount: " + result.get("discount"));
+                
+                return ResponseEntity.ok(result);
+            } else {
+                System.out.println("❌ Coupon validation failed: " + result.get("message"));
+                return ResponseEntity.badRequest().body(result);
+            }
             
         } catch (Exception e) {
             System.out.println("❌ ERROR: " + e.getMessage());

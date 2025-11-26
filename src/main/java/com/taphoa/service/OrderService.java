@@ -35,13 +35,17 @@ public class OrderService {
             throw new RuntimeException("Giỏ hàng trống!");
         }
         
+        double totalAmount = cartService.getCartTotal(user);
+        
         // Tạo đơn hàng
         Order order = new Order();
         order.setUser(user);
         order.setPhone(phone);
         order.setAddress(address);
         order.setNote(note);
-        order.setTotalAmount(cartService.getCartTotal(user));
+        order.setSubtotalAmount(totalAmount);
+        order.setDiscountAmount(0.0);
+        order.setTotalAmount(totalAmount);
         order.setStatus("PENDING");
         
         Order savedOrder = orderRepository.save(order);
@@ -65,17 +69,21 @@ public class OrderService {
     }
     
     /**
-     * TẠO ĐƠN HÀNG CHỈ VỚI CÁC SẢN PHẨM ĐÃ CHỌN (API MỚI)
+     * ✅ TẠO ĐƠN HÀNG CHỈ VỚI CÁC SẢN PHẨM ĐÃ CHỌN + COUPON (API MỚI)
      */
     @Transactional
     public Order createOrderFromSelectedItems(User user, 
                                              List<Long> selectedCartItemIds, 
                                              String phone, 
                                              String address, 
-                                             String note) {
+                                             String note,
+                                             String couponCode,      // ✅ THÊM
+                                             Double discountAmount) { // ✅ THÊM
         System.out.println("=== CREATE ORDER FROM SELECTED ITEMS ===");
         System.out.println("User: " + user.getUsername());
         System.out.println("Selected IDs: " + selectedCartItemIds);
+        System.out.println("Coupon Code: " + couponCode);
+        System.out.println("Discount Amount: " + discountAmount);
         
         // Lấy TẤT CẢ cart items của user
         List<CartItem> allCartItems = cartService.getCartItems(user);
@@ -91,20 +99,31 @@ public class OrderService {
             throw new RuntimeException("Không tìm thấy sản phẩm đã chọn!");
         }
         
-        // Tính tổng tiền CHỈ từ các sản phẩm đã chọn
-        double totalAmount = selectedCartItems.stream()
+        // ✅ TÍNH TỔNG TIỀN GỐC (subtotal) - TRƯỚC GIẢM GIÁ
+        double subtotal = selectedCartItems.stream()
                 .mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity())
                 .sum();
         
-        System.out.println("Total amount: " + totalAmount);
+        // ✅ XỬ LÝ DISCOUNT
+        double finalDiscount = (discountAmount != null && discountAmount > 0) ? discountAmount : 0.0;
         
-        // Tạo đơn hàng
+        // ✅ TÍNH TỔNG TIỀN SAU GIẢM (totalAmount)
+        double totalAmount = subtotal - finalDiscount;
+        
+        System.out.println("Subtotal: " + subtotal);
+        System.out.println("Discount: " + finalDiscount);
+        System.out.println("Total: " + totalAmount);
+        
+        // ✅ TẠO ĐƠN HÀNG VỚI ĐẦY ĐỦ THÔNG TIN
         Order order = new Order();
         order.setUser(user);
         order.setPhone(phone);
         order.setAddress(address);
         order.setNote(note);
-        order.setTotalAmount(totalAmount);
+        order.setSubtotalAmount(subtotal);           // ✅ Tổng GỐC
+        order.setDiscountAmount(finalDiscount);      // ✅ Số tiền giảm
+        order.setCouponCode(couponCode);             // ✅ Mã coupon
+        order.setTotalAmount(totalAmount);           // ✅ Tổng SAU GIẢM
         order.setStatus("PENDING");
         
         Order savedOrder = orderRepository.save(order);
@@ -127,7 +146,7 @@ public class OrderService {
             System.out.println("  - Removed from cart: " + cartItem.getProduct().getName());
         }
         
-        System.out.println("✅ Order created from selected items! ID: " + savedOrder.getId());
+        System.out.println("✅ Order created from selected items with discount! ID: " + savedOrder.getId());
         
         return savedOrder;
     }
