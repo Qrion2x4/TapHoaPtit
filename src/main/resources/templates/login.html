@@ -16,7 +16,9 @@
         <form method="post" action="/login">
             <div class="form-group">
                 <label for="username">👤 Tên đăng nhập:</label>
-                <input type="text" id="username" name="username" 
+                <input type="text" 
+                       id="username" 
+                       name="username" 
                        placeholder="Nhập tên đăng nhập..." 
                        required 
                        autocomplete="username">
@@ -24,10 +26,16 @@
             
             <div class="form-group">
                 <label for="password">🔒 Mật khẩu:</label>
-                <input type="password" id="password" name="password" 
+                <input type="password" 
+                       id="password" 
+                       name="password" 
                        placeholder="Nhập mật khẩu..." 
                        required 
                        autocomplete="current-password">
+            </div>
+            
+            <div class="forgot-password">
+                <a href="/forgot-password">🔑 Quên mật khẩu?</a>
             </div>
             
             <button type="submit">Đăng nhập</button>

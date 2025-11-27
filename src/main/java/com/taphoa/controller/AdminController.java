@@ -16,13 +16,15 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.InputStream;
-import java.nio.file.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import java.io.InputStream;
+import java.nio.file.*;
 import java.time.LocalTime;
-import java.util.Date;
-import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
@@ -91,6 +93,114 @@ public class AdminController {
         model.addAttribute("username", session.getAttribute("username"));
 
         return "admin/dashboard";
+    }
+
+    /**
+     * API lấy thống kê doanh thu và doanh số theo khoảng ngày
+     */
+    @GetMapping("/api/statistics")
+    @ResponseBody
+    public Map<String, Object> getStatistics(
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
+            HttpSession session) {
+
+        if (!isAdmin(session)) {
+            return Map.of("error", "Unauthorized");
+        }
+
+        // Mặc định: 30 ngày gần nhất
+        if (endDate == null) endDate = LocalDate.now();
+        if (startDate == null) startDate = endDate.minusDays(30);
+
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+
+        Map<String, Object> stats = new HashMap<>();
+
+        // Doanh thu tổng
+        Double totalRevenue = orderRepository.getTotalRevenueByDateRange(startDateTime, endDateTime);
+        Long totalProductsSold = orderRepository.getTotalProductsSoldByDateRange(startDateTime, endDateTime);
+
+        stats.put("totalRevenue", totalRevenue != null ? totalRevenue : 0);
+        stats.put("totalProductsSold", totalProductsSold != null ? totalProductsSold : 0);
+        stats.put("startDate", startDate.toString());
+        stats.put("endDate", endDate.toString());
+
+        // Doanh thu theo ngày
+        List<Object[]> dailyData = orderRepository.getRevenueByDay(startDateTime, endDateTime);
+        List<Map<String, Object>> dailyStats = dailyData.stream().map(row -> {
+            Map<String, Object> day = new HashMap<>();
+            day.put("date", row[0].toString());
+            day.put("revenue", row[1]);
+            day.put("orderCount", row[2]);
+            return day;
+        }).collect(Collectors.toList());
+        stats.put("dailyRevenue", dailyStats);
+
+        // Doanh số bán theo sản phẩm
+        List<Object[]> productSales = orderRepository.getProductSalesStatistics(startDateTime, endDateTime);
+        List<Map<String, Object>> productStats = productSales.stream().map(row -> {
+            Map<String, Object> product = new HashMap<>();
+            product.put("productId", row[0]);
+            product.put("productName", row[1]);
+            product.put("quantitySold", row[2]);
+            product.put("revenue", row[3]);
+            return product;
+        }).collect(Collectors.toList());
+        stats.put("productSales", productStats);
+
+        // Thống kê đơn hàng theo trạng thái
+        List<Object[]> orderStatus = orderRepository.getOrderCountByStatus(startDateTime, endDateTime);
+        Map<String, Long> statusStats = new HashMap<>();
+        for (Object[] row : orderStatus) {
+            statusStats.put((String) row[0], ((Number) row[1]).longValue());
+        }
+        stats.put("orderByStatus", statusStats);
+
+        return stats;
+    }
+
+    /**
+     * API lấy doanh thu theo tháng
+     */
+    @GetMapping("/api/monthly-statistics")
+    @ResponseBody
+    public Map<String, Object> getMonthlyStatistics(
+            @RequestParam(required = false) Integer year,
+            HttpSession session) {
+
+        if (!isAdmin(session)) {
+            return Map.of("error", "Unauthorized");
+        }
+
+        if (year == null) year = LocalDate.now().getYear();
+
+        LocalDateTime startDateTime = LocalDate.of(year, 1, 1).atStartOfDay();
+        LocalDateTime endDateTime = LocalDate.of(year, 12, 31).atTime(LocalTime.MAX);
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("year", year);
+
+        // Doanh thu theo tháng
+        List<Object[]> monthlyData = orderRepository.getRevenueByMonth(startDateTime, endDateTime);
+        List<Map<String, Object>> monthlyStats = monthlyData.stream().map(row -> {
+            Map<String, Object> month = new HashMap<>();
+            month.put("month", String.format("%d/%d", ((Number) row[1]).intValue(), ((Number) row[0]).intValue()));
+            month.put("revenue", row[2]);
+            month.put("orderCount", row[3]);
+            return month;
+        }).collect(Collectors.toList());
+
+        stats.put("monthlyRevenue", monthlyStats);
+
+        // Tổng doanh thu cả năm
+        Double totalRevenue = monthlyStats.stream()
+                .mapToDouble(m -> ((Number) m.get("revenue")).doubleValue())
+                .sum();
+        stats.put("totalRevenue", totalRevenue);
+
+        return stats;
     }
 
     @GetMapping("/orders")
@@ -321,4 +431,68 @@ public class AdminController {
 
         return "redirect:/admin/products";
     }
+
+        /**
+     * ✅ XÁC NHẬN HỦY ĐƠN (ADMIN DUYỆT YÊU CẦU HỦY)
+     */
+    @PostMapping("/orders/{id}/approve-cancel")
+    public String approveCancelOrder(@PathVariable Long id,
+                                    HttpSession session,
+                                    RedirectAttributes redirectAttributes) {
+        if (!isAdmin(session)) {
+            return "redirect:/login";
+        }
+        
+        try {
+            Order order = orderRepository.findById(id).orElse(null);
+            
+            if (order != null && "CANCEL_REQUESTED".equals(order.getStatus())) {
+                order.setStatus("CANCELLED");
+                orderRepository.save(order);
+                
+                System.out.println("✅ Admin approved cancel request for order #" + id);
+                redirectAttributes.addFlashAttribute("success", "✅ Đã xác nhận hủy đơn hàng #" + id);
+            } else {
+                redirectAttributes.addFlashAttribute("error", "❌ Không thể hủy đơn hàng này!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "❌ Lỗi: " + e.getMessage());
+        }
+        
+        return "redirect:/admin/orders";
+    }
+
+    /**
+     * ✅ TỪ CHỐI HỦY ĐƠN (ADMIN TỪ CHỐI YÊU CẦU)
+     */
+    @PostMapping("/orders/{id}/reject-cancel")
+    public String rejectCancelOrder(@PathVariable Long id,
+                                    HttpSession session,
+                                    RedirectAttributes redirectAttributes) {
+        if (!isAdmin(session)) {
+            return "redirect:/login";
+        }
+        
+        try {
+            Order order = orderRepository.findById(id).orElse(null);
+            
+            if (order != null && "CANCEL_REQUESTED".equals(order.getStatus())) {
+                // Trả lại trạng thái CONFIRMED
+                order.setStatus("CONFIRMED");
+                orderRepository.save(order);
+                
+                System.out.println("❌ Admin rejected cancel request for order #" + id);
+                redirectAttributes.addFlashAttribute("success", "✅ Đã từ chối yêu cầu hủy đơn hàng #" + id);
+            } else {
+                redirectAttributes.addFlashAttribute("error", "❌ Không thể xử lý yêu cầu này!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "❌ Lỗi: " + e.getMessage());
+        }
+        
+        return "redirect:/admin/orders";
+    }
+
 }

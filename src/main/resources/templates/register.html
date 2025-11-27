@@ -11,30 +11,153 @@
         <h2>📝 Đăng ký tài khoản</h2>
         
         <div th:if="${error}" class="error" th:text="${error}"></div>
+        <div th:if="${success}" class="success" th:text="${success}"></div>
         
-        <form method="post" action="/register">
+        <form method="post" action="/register" id="registerForm">
+            <!-- Tên đăng nhập -->
             <div class="form-group">
-                <label for="username">Tên đăng nhập:</label>
-                <input type="text" id="username" name="username" required>
+                <label for="username">
+                    👤 Tên đăng nhập: <span class="required">*</span>
+                </label>
+                <input type="text" 
+                       id="username" 
+                       name="username" 
+                       placeholder="Nhập tên đăng nhập (4-20 ký tự)"
+                       required 
+                       minlength="4"
+                       maxlength="20"
+                       autocomplete="username">
+                <small class="hint">Chỉ sử dụng chữ cái, số và dấu gạch dưới</small>
             </div>
             
+            <!-- Họ tên -->
             <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
+                <label for="fullName">
+                    📛 Họ và tên: <span class="required">*</span>
+                </label>
+                <input type="text" 
+                       id="fullName" 
+                       name="fullName" 
+                       placeholder="Nhập họ và tên đầy đủ"
+                       required
+                       autocomplete="name">
             </div>
             
+            <!-- Email -->
             <div class="form-group">
-                <label for="password">Mật khẩu:</label>
-                <input type="password" id="password" name="password" required>
+                <label for="email">
+                    📧 Email: <span class="required">*</span>
+                </label>
+                <input type="email" 
+                       id="email" 
+                       name="email" 
+                       placeholder="example@gmail.com"
+                       required
+                       autocomplete="email">
+                <small class="hint">Email sẽ được dùng để xác thực tài khoản</small>
             </div>
             
-            <button type="submit">Đăng ký</button>
+            <!-- Số điện thoại -->
+            <div class="form-group">
+                <label for="phone">
+                    📱 Số điện thoại:
+                </label>
+                <input type="tel" 
+                       id="phone" 
+                       name="phone" 
+                       placeholder="0912345678"
+                       pattern="[0-9]{10}"
+                       autocomplete="tel">
+                <small class="hint">10 chữ số (không bắt buộc)</small>
+            </div>
+            
+            <!-- Mật khẩu -->
+            <div class="form-group">
+                <label for="password">
+                    🔒 Mật khẩu: <span class="required">*</span>
+                </label>
+                <input type="password" 
+                       id="password" 
+                       name="password" 
+                       placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
+                       required 
+                       minlength="6"
+                       autocomplete="new-password">
+                <small class="hint">Tối thiểu 6 ký tự, nên có chữ hoa, số và ký tự đặc biệt</small>
+            </div>
+            
+            <!-- Xác nhận mật khẩu -->
+            <div class="form-group">
+                <label for="confirmPassword">
+                    🔐 Xác nhận mật khẩu: <span class="required">*</span>
+                </label>
+                <input type="password" 
+                       id="confirmPassword" 
+                       name="confirmPassword" 
+                       placeholder="Nhập lại mật khẩu"
+                       required 
+                       minlength="6"
+                       autocomplete="new-password">
+                <small class="hint error-message" id="passwordError" style="display: none;">
+                    ⚠️ Mật khẩu không khớp!
+                </small>
+            </div>
+            
+            <button type="submit" id="submitBtn">Đăng ký</button>
         </form>
         
         <div class="link">
-            <p>Đã có tài khoản? <a href="/login">Đăng nhập</a></p>
+            <p>Đã có tài khoản? <a href="/login">Đăng nhập ngay</a></p>
             <p><a href="/">← Về trang chủ</a></p>
         </div>
     </div>
+    
+    <script>
+        // Kiểm tra mật khẩu khớp
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const passwordError = document.getElementById('passwordError');
+        const submitBtn = document.getElementById('submitBtn');
+        const form = document.getElementById('registerForm');
+        
+        function checkPasswordMatch() {
+            if (confirmPassword.value === '') {
+                passwordError.style.display = 'none';
+                return true;
+            }
+            
+            if (password.value !== confirmPassword.value) {
+                passwordError.style.display = 'block';
+                confirmPassword.style.borderColor = '#f44336';
+                return false;
+            } else {
+                passwordError.style.display = 'none';
+                confirmPassword.style.borderColor = '#4CAF50';
+                return true;
+            }
+        }
+        
+        confirmPassword.addEventListener('input', checkPasswordMatch);
+        password.addEventListener('input', checkPasswordMatch);
+        
+        // Validate trước khi submit
+        form.addEventListener('submit', function(e) {
+            if (!checkPasswordMatch()) {
+                e.preventDefault();
+                alert('❌ Mật khẩu xác nhận không khớp!');
+                return false;
+            }
+            
+            // Kiểm tra username chỉ chứa chữ cái, số và dấu gạch dưới
+            const username = document.getElementById('username').value;
+            const usernameRegex = /^[a-zA-Z0-9_]+$/;
+            
+            if (!usernameRegex.test(username)) {
+                e.preventDefault();
+                alert('❌ Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới!');
+                return false;
+            }
+        });
+    </script>
 </body>
 </html>

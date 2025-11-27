@@ -29,6 +29,9 @@ public class MainController {
     @Autowired
     private OrderService orderService;
     
+    // ============================================
+    // TRANG CHỦ
+    // ============================================
     @GetMapping("/")
     public String home(HttpSession session, Model model) {
         String username = (String) session.getAttribute("username");
@@ -39,7 +42,6 @@ public class MainController {
             if (userId != null) {
                 User user = userService.getUserById(userId);
                 if (user != null) {
-                    // Nếu là admin thì redirect về trang admin
                     if ("ADMIN".equals(user.getRole())) {
                         return "redirect:/admin";
                     }
@@ -59,9 +61,11 @@ public class MainController {
         return "index";
     }
     
+    // ============================================
+    // ĐĂNG NHẬP
+    // ============================================
     @GetMapping("/login")
     public String loginPage(HttpSession session) {
-        // Nếu đã đăng nhập rồi thì redirect về trang chủ
         if (session.getAttribute("userId") != null) {
             return "redirect:/";
         }
@@ -75,29 +79,22 @@ public class MainController {
                        Model model) {
         try {
             User user = userService.authenticate(username, password);
-            if (user != null) {
-                session.setAttribute("username", user.getUsername());
-                session.setAttribute("userId", user.getId());
-                session.setAttribute("userRole", user.getRole());
-                
-                // LOG
-                System.out.println("=== LOGIN SUCCESS ===");
-                System.out.println("Username: " + user.getUsername());
-                System.out.println("UserId: " + user.getId());
-                System.out.println("Role: " + user.getRole());
-                System.out.println("Session ID: " + session.getId());
-                
-                // Nếu là ADMIN thì redirect về /admin
-                if ("ADMIN".equals(user.getRole())) {
-                    return "redirect:/admin";
-                }
-                
-                // Nếu là USER thì về trang chủ
-                return "redirect:/";
-            } else {
-                model.addAttribute("error", "Sai tên đăng nhập hoặc mật khẩu!");
-                return "login";
+            
+            session.setAttribute("username", user.getUsername());
+            session.setAttribute("userId", user.getId());
+            session.setAttribute("userRole", user.getRole());
+            
+            System.out.println("=== LOGIN SUCCESS ===");
+            System.out.println("Username: " + user.getUsername());
+            System.out.println("UserId: " + user.getId());
+            System.out.println("Role: " + user.getRole());
+            
+            if ("ADMIN".equals(user.getRole())) {
+                return "redirect:/admin";
             }
+            
+            return "redirect:/";
+            
         } catch (Exception e) {
             System.out.println("Login error: " + e.getMessage());
             model.addAttribute("error", e.getMessage());
@@ -105,39 +102,189 @@ public class MainController {
         }
     }
     
+    // ============================================
+    // ĐĂNG KÝ
+    // ============================================
     @GetMapping("/register")
-    public String registerPage() {
+    public String registerPage(HttpSession session) {
+        if (session.getAttribute("userId") != null) {
+            return "redirect:/";
+        }
         return "register";
     }
     
     @PostMapping("/register")
     public String register(@RequestParam String username,
                           @RequestParam String password,
+                          @RequestParam String confirmPassword,
                           @RequestParam String email,
+                          @RequestParam String fullName,
+                          @RequestParam(required = false) String phone,
                           Model model) {
         try {
-            userService.registerUser(username, password, email);
-            model.addAttribute("success", "Đăng ký thành công! Vui lòng đăng nhập.");
+            // Kiểm tra mật khẩu khớp
+            if (!password.equals(confirmPassword)) {
+                model.addAttribute("error", "Mật khẩu xác nhận không khớp!");
+                return "register";
+            }
+            
+            // Đăng ký user
+            userService.registerUser(username, password, email, fullName, phone);
+            
+            model.addAttribute("success", "✅ Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.");
             return "login";
+            
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
             return "register";
         }
     }
     
+    // ============================================
+    // XÁC THỰC EMAIL
+    // ============================================
+    @GetMapping("/verify-email")
+    public String verifyEmail(@RequestParam String token, Model model) {
+        try {
+            boolean verified = userService.verifyEmail(token);
+            
+            if (verified) {
+                model.addAttribute("success", "🎉 Email đã được xác thực thành công! Bạn có thể đăng nhập ngay bây giờ.");
+            } else {
+                model.addAttribute("error", "❌ Link xác thực không hợp lệ hoặc đã hết hạn!");
+            }
+            
+        } catch (Exception e) {
+            model.addAttribute("error", "❌ Có lỗi xảy ra: " + e.getMessage());
+        }
+        
+        return "verify-email";
+    }
+    
+    // ============================================
+    // QUÊN MẬT KHẨU
+    // ============================================
+    @GetMapping("/forgot-password")
+    public String forgotPasswordPage() {
+        return "forgot-password";
+    }
+    
+    @PostMapping("/forgot-password")
+    public String forgotPassword(@RequestParam String email, Model model) {
+        try {
+            userService.requestPasswordReset(email);
+            model.addAttribute("success", "✅ Đã gửi link đặt lại mật khẩu đến email của bạn. Vui lòng kiểm tra hộp thư!");
+            
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+        }
+        
+        return "forgot-password";
+    }
+    
+    // ============================================
+    // RESET MẬT KHẨU
+    // ============================================
+    @GetMapping("/reset-password")
+    public String resetPasswordPage(@RequestParam String token, Model model) {
+        try {
+            // Kiểm tra token có hợp lệ không
+            userService.validateResetToken(token);
+            model.addAttribute("token", token);
+            return "reset-password";
+            
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            return "forgot-password";
+        }
+    }
+    
+    @PostMapping("/reset-password")
+    public String resetPassword(@RequestParam String token,
+                               @RequestParam String password,
+                               @RequestParam String confirmPassword,
+                               Model model) {
+        try {
+            // Kiểm tra mật khẩu khớp
+            if (!password.equals(confirmPassword)) {
+                model.addAttribute("error", "Mật khẩu xác nhận không khớp!");
+                model.addAttribute("token", token);
+                return "reset-password";
+            }
+            
+            // Reset password
+            userService.resetPassword(token, password);
+            model.addAttribute("success", "✅ Đặt lại mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới.");
+            return "login";
+            
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("token", token);
+            return "reset-password";
+        }
+    }
+    
+    // ============================================
+    // ĐỔI MẬT KHẨU (KHI ĐÃ ĐĂNG NHẬP)
+    // ============================================
+    @GetMapping("/change-password")
+    public String changePasswordPage(HttpSession session, Model model) {
+        Long userId = (Long) session.getAttribute("userId");
+        
+        if (userId == null) {
+            return "redirect:/login";
+        }
+        
+        model.addAttribute("username", session.getAttribute("username"));
+        return "change-password";
+    }
+    
+    @PostMapping("/change-password")
+    public String changePassword(@RequestParam String oldPassword,
+                                @RequestParam String newPassword,
+                                @RequestParam String confirmPassword,
+                                HttpSession session,
+                                Model model) {
+        Long userId = (Long) session.getAttribute("userId");
+        
+        if (userId == null) {
+            return "redirect:/login";
+        }
+        
+        try {
+            // Kiểm tra mật khẩu mới khớp
+            if (!newPassword.equals(confirmPassword)) {
+                model.addAttribute("error", "Mật khẩu xác nhận không khớp!");
+                return "change-password";
+            }
+            
+            // Đổi mật khẩu
+            userService.changePassword(userId, oldPassword, newPassword);
+            model.addAttribute("success", "✅ Đổi mật khẩu thành công!");
+            
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+        }
+        
+        model.addAttribute("username", session.getAttribute("username"));
+        return "change-password";
+    }
+    
+    // ============================================
+    // ĐĂNG XUẤT
+    // ============================================
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         System.out.println("=== LOGOUT ===");
-        System.out.println("Session ID before invalidate: " + session.getId());
         session.invalidate();
         return "redirect:/";
     }
     
+    // ============================================
+    // SẢN PHẨM THEO DANH MỤC
+    // ============================================
     @GetMapping("/products/category/{category}")
     public String productsByCategory(@PathVariable String category, Model model, HttpSession session) {
-        System.out.println("=== CATEGORY PAGE ===");
-        System.out.println("Category: " + category);
-        
         String username = (String) session.getAttribute("username");
         model.addAttribute("username", username);
         
@@ -153,19 +300,17 @@ public class MainController {
         }
         
         List<Product> products = productService.getProductsByCategory(category);
-        System.out.println("Found " + products.size() + " products in category: " + category);
-        
         model.addAttribute("products", products);
         model.addAttribute("category", category);
         
         return "category";
     }
     
+    // ============================================
+    // TÌM KIẾM
+    // ============================================
     @GetMapping("/search")
     public String search(@RequestParam String keyword, Model model, HttpSession session) {
-        System.out.println("=== SEARCH ===");
-        System.out.println("Keyword: " + keyword);
-        
         String username = (String) session.getAttribute("username");
         model.addAttribute("username", username);
         
@@ -181,8 +326,6 @@ public class MainController {
         }
         
         List<Product> products = productService.searchProducts(keyword);
-        System.out.println("Found " + products.size() + " products");
-        
         model.addAttribute("products", products);
         model.addAttribute("keyword", keyword);
         model.addAttribute("category", "Kết quả tìm kiếm: " + keyword);
@@ -190,6 +333,9 @@ public class MainController {
         return "category";
     }
     
+    // ============================================
+    // ĐỌN HÀNG CỦA TÔI
+    // ============================================
     @GetMapping("/my-orders")
     public String myOrders(HttpSession session, Model model) {
         Long userId = (Long) session.getAttribute("userId");

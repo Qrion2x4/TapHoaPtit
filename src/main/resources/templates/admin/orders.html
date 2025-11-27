@@ -173,26 +173,30 @@
 
                 <td>
                     <div class="action-group">
-
+                        <!-- Form cập nhật trạng thái bình thường -->
                         <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="status-form">
                             <select name="status" class="status-select">
-                                <option value="PENDING"
-                                        th:selected="${order.status == 'PENDING'}">Chờ xử lý</option>
-
-                                <option value="CONFIRMED"
-                                        th:selected="${order.status == 'CONFIRMED'}">Đã xác nhận</option>
-
-                                <option value="SHIPPING"
-                                        th:selected="${order.status == 'SHIPPING'}">Đang giao</option>
-
-                                <option value="COMPLETED"
-                                        th:selected="${order.status == 'COMPLETED'}">Hoàn thành</option>
-
-                                <option value="CANCELLED"
-                                        th:selected="${order.status == 'CANCELLED'}">Hủy đơn</option>
+                                <option value="PENDING" th:selected="${order.status == 'PENDING'}">Chờ xử lý</option>
+                                <option value="CONFIRMED" th:selected="${order.status == 'CONFIRMED'}">Đã xác nhận</option>
+                                <option value="SHIPPING" th:selected="${order.status == 'SHIPPING'}">Đang giao</option>
+                                <option value="COMPLETED" th:selected="${order.status == 'COMPLETED'}">Hoàn thành</option>
+                                <option value="CANCELLED" th:selected="${order.status == 'CANCELLED'}">Hủy đơn</option>
                             </select>
                             <button type="submit" class="btn-save">Lưu</button>
                         </form>
+                        
+                        <!-- ✅ NÚT DUYỆT/TỪ CHỐI HỦY (CHỈ HIỆN KHI STATUS = CANCEL_REQUESTED) -->
+                        <div th:if="${order.status == 'CANCEL_REQUESTED'}" style="display: flex; gap: 5px; margin-top: 10px;">
+                            <form th:action="@{/admin/orders/{id}/approve-cancel(id=${order.id})}" method="post" 
+                                onsubmit="return confirm('Xác nhận hủy đơn hàng này?');" style="display: inline;">
+                                <button type="submit" class="btn-save" style="background: #27ae60;">✓ Duyệt hủy</button>
+                            </form>
+                            
+                            <form th:action="@{/admin/orders/{id}/reject-cancel(id=${order.id})}" method="post" 
+                                onsubmit="return confirm('Từ chối yêu cầu hủy?');" style="display: inline;">
+                                <button type="submit" class="btn-save" style="background: #e74c3c;">✕ Từ chối</button>
+                            </form>
+                        </div>
                     </div>
                 </td>
             </tr>

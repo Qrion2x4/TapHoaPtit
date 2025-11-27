@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đơn Hàng Của Tôi - TapHoaPtit.online</title>
     <style>
+        /* CSS styles đã được tối ưu hóa */
         * {
             margin: 0;
             padding: 0;
@@ -16,7 +17,7 @@
             background: #f5f5f5;
         }
         
-        /* Header */
+        /* Header styles */
         .header-top {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -173,6 +174,38 @@
             gap: 10px;
         }
         
+        /* Alert Messages */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+        
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+        
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+        
         /* Orders */
         .orders-container {
             display: flex;
@@ -257,7 +290,24 @@
         }
         
         .item-icon {
-            font-size: 40px;
+            width: 60px;
+            height: 60px;
+            overflow: hidden;
+            border-radius: 5px;
+            border: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .item-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .item-icon span {
+            font-size: 30px;
         }
         
         .item-details {
@@ -304,6 +354,7 @@
             color: #667eea;
         }
         
+        /* Status Badges */
         .status-badge {
             padding: 10px 20px;
             border-radius: 25px;
@@ -338,6 +389,66 @@
             color: #842029;
         }
         
+        .status-cancel-requested {
+            background: #fff3cd;
+            color: #664d03;
+            border: 2px solid #ffc107;
+        }
+        
+        /* Order Actions */
+        .order-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .btn-cancel-order {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-cancel-order:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-request-cancel {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-request-cancel:hover {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+        
+        /* Empty State */
         .empty-orders {
             background: white;
             border-radius: 10px;
@@ -374,26 +485,6 @@
         
         .btn-primary:hover {
             transform: translateY(-2px);
-        }
-        
-        /* Alert */
-        .alert {
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-        
-        .alert-success {
-            background: #d1e7dd;
-            color: #0f5132;
-            border-left: 4px solid #198754;
-        }
-        
-        .alert-error {
-            background: #f8d7da;
-            color: #842029;
-            border-left: 4px solid #dc3545;
         }
         
         /* Footer */
@@ -487,9 +578,15 @@
     <div class="main-content">
         <h1 class="page-title">📦 Đơn Hàng Của Tôi</h1>
         
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+        <div th:if="${warning}" class="alert alert-warning" th:text="${warning}"></div>
+        <div th:if="${info}" class="alert alert-info" th:text="${info}"></div>
+        
         <!-- Nếu không có đơn hàng -->
         <div th:if="${orders.size() == 0}" class="empty-orders">
-            <div class="empty-orders-icon">📭</div>
+            <div class="empty-orders-icon">🔭</div>
             <h2>Chưa có đơn hàng nào</h2>
             <p>Bạn chưa đặt đơn hàng nào. Hãy bắt đầu mua sắm ngay!</p>
             <a href="/" class="btn-primary">🛍️ Mua sắm ngay</a>
@@ -510,11 +607,13 @@
                               th:classappend="${order.status == 'PENDING' ? 'status-pending' : 
                                                order.status == 'CONFIRMED' ? 'status-confirmed' :
                                                order.status == 'SHIPPING' ? 'status-shipping' :
-                                               order.status == 'COMPLETED' ? 'status-completed' : 'status-cancelled'}"
+                                               order.status == 'COMPLETED' ? 'status-completed' :
+                                               order.status == 'CANCEL_REQUESTED' ? 'status-cancel-requested' : 'status-cancelled'}"
                               th:text="${order.status == 'PENDING' ? '⏳ Chờ xử lý' : 
                                        order.status == 'CONFIRMED' ? '✅ Đã xác nhận' :
                                        order.status == 'SHIPPING' ? '🚚 Đang giao' :
-                                       order.status == 'COMPLETED' ? '✅ Hoàn thành' : '❌ Đã hủy'}">
+                                       order.status == 'COMPLETED' ? '✅ Hoàn thành' :
+                                       order.status == 'CANCEL_REQUESTED' ? '⏳ Chờ hủy' : '❌ Đã hủy'}">
                             ⏳ Chờ xử lý
                         </span>
                     </div>
@@ -534,20 +633,21 @@
                             <div class="info-label">📝 Ghi chú</div>
                             <div class="info-value" th:text="${order.note}">-</div>
                         </div>
+                        <div class="info-item" th:if="${order.couponCode}">
+                            <div class="info-label">🎟️ Mã giảm giá</div>
+                            <div class="info-value" th:text="${order.couponCode}">NEWBIE</div>
+                        </div>
                     </div>
                     
                     <div class="order-items">
                         <h4>📋 Sản phẩm đã đặt:</h4>
                         <div class="order-item" th:each="item : ${order.orderItems}">
-                            <div class="item-icon" style="width: 60px; height: 60px; overflow: hidden; border-radius: 5px; border: 1px solid #eee; display: flex; align-items: center; justify-content: center;">
+                            <div class="item-icon">
                                 <img th:if="${item.product.imageUrl != null and item.product.imageUrl.contains('.')}"
                                      th:src="@{'/images/' + ${item.product.imageUrl}}"
-                                     alt="SP"
-                                     style="width: 100%; height: 100%; object-fit: cover;">
-
+                                     alt="SP">
                                 <span th:unless="${item.product.imageUrl != null and item.product.imageUrl.contains('.')}"
-                                      th:text="${item.product.imageUrl}"
-                                      style="font-size: 30px;">🍚</span>
+                                      th:text="${item.product.imageUrl}">🛒</span>
                             </div>
                             <div class="item-details">
                                 <div class="item-name" th:text="${item.product.name}">Gạo ST25</div>
@@ -565,15 +665,57 @@
                     </div>
                     
                     <div class="order-footer">
-                        <div class="order-total">
-                            Tổng cộng: <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'">238,000₫</span>
+                        <div>
+                            <div class="order-total">
+                                Tổng cộng: <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'">238,000₫</span>
+                            </div>
+                            <div th:if="${order.discountAmount != null and order.discountAmount > 0}" 
+                                 style="font-size: 14px; color: #27ae60; margin-top: 5px;">
+                                (Đã giảm <span th:text="${#numbers.formatDecimal(order.discountAmount, 0, 'COMMA', 0, 'POINT')} + '₫'">10,200₫</span>)
+                            </div>
+                        </div>
+                        
+                        <!-- Nút hủy đơn hàng -->
+                        <div class="order-actions">
+                            <!-- Đơn PENDING: Hủy trực tiếp -->
+                            <form th:if="${order.status == 'PENDING'}" 
+                                  th:action="@{/order/cancel/{id}(id=${order.id})}" 
+                                  method="post"
+                                  onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng này?');">
+                                <button type="submit" class="btn-cancel-order">
+                                    ❌ Hủy đơn hàng
+                                </button>
+                            </form>
+                            
+                            <!-- Đơn CONFIRMED: Yêu cầu hủy -->
+                            <form th:if="${order.status == 'CONFIRMED'}" 
+                                  th:action="@{/order/cancel/{id}(id=${order.id})}" 
+                                  method="post"
+                                  onsubmit="return confirm('Gửi yêu cầu hủy đơn hàng? Cửa hàng sẽ xem xét và phản hồi sớm nhất.');">
+                                <button type="submit" class="btn-request-cancel">
+                                    ⏳ Yêu cầu hủy đơn
+                                </button>
+                            </form>
+                            
+                            <!-- Đơn CANCEL_REQUESTED: Hiển thị thông báo -->
+                            <div th:if="${order.status == 'CANCEL_REQUESTED'}" 
+                                 style="color: #f59e0b; font-size: 14px; font-weight: 600;">
+                                ⏳ Đang chờ cửa hàng xác nhận hủy...
+                            </div>
+                            
+                            <!-- Đơn SHIPPING, COMPLETED: Không cho hủy -->
+                            <div th:if="${order.status == 'SHIPPING' or order.status == 'COMPLETED'}" 
+                                 style="color: #666; font-size: 14px;">
+                                <span th:if="${order.status == 'SHIPPING'}">🚚 Đơn hàng đang được giao, không thể hủy</span>
+                                <span th:if="${order.status == 'COMPLETED'}">✅ Đơn hàng đã hoàn thành</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Footer -->
     <div class="footer">
         <div class="container">
@@ -586,7 +728,6 @@
                 <h3>📋 Hỗ trợ khách hàng</h3>
                 <a href="#">Hướng dẫn mua hàng</a>
                 <a href="#">Chính sách đổi trả</a>
-                <a href="#">Phương thức thanh toán</a>
             </div>
             <div>
                 <h3>📞 Liên hệ</h3>
@@ -595,7 +736,7 @@
             </div>
         </div>
         <div class="copyright">
-            © 2024 TapHoaPtit.online - Tạp hóa trực tuyến
+            © 2025 TapHoaPtit.online - Tạp hóa trực tuyến
         </div>
     </div>
 </body>

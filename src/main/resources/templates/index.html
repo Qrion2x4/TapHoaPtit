@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 </head>
 <body>
     <!-- Header Top -->
@@ -21,6 +22,7 @@
                 <div th:if="${username}">
                     <span class="user-welcome">Xin chào, <strong th:text="${username}">User</strong>! 👋</span>
                     <a href="/my-orders" class="auth-btn" style="background: rgba(255,255,255,0.2); margin-right: 10px;">📦 Đơn hàng</a>
+                    <a href="/change-password" class="auth-btn" style="background: rgba(255,255,255,0.2); margin-right: 10px;">🔐 Đổi mật khẩu</a>
                     <a href="/logout" class="auth-btn btn-logout">Đăng xuất</a>
                 </div>
                 <div th:unless="${username}">
