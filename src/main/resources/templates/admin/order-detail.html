@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết đơn hàng - Admin</title>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; color: #333; }
+
+        .container {
+            max-width: 1050px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        h2 { font-size: 24px; color: #2d3748; }
+
+        .back-btn {
+            background: #edf2f7;
+            color: #4a5568;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        /* Badge trạng thái */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .status-pending { background: #feebc8; color: #7c2d12; }
+        .status-confirmed { background: #bee3f8; color: #2c5282; }
+        .status-shipping { background: #c6f6d5; color: #22543d; }
+        .status-completed { background: #9ae6b4; color: #22543d; }
+        .status-cancelled { background: #fed7d7; color: #742a2a; }
+        .status-request { background: #e9d8fd; color: #553c9a; }
+
+        /* Section */
+        .section { margin-top: 30px; }
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #718096;
+            margin-bottom: 15px;
+        }
+
+        /* Info boxes */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .info-box {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #edf2f7;
+        }
+
+        .label { font-size: 13px; color: #718096; }
+        .value { font-size: 16px; font-weight: 600; margin-top: 3px; }
+
+        /* Ghi chú */
+        .note-box {
+            margin-top: 15px;
+            padding: 12px;
+            background: #fffbe6;
+            border: 1px solid #ffe58f;
+            border-radius: 6px;
+            color: #b7791f;
+            line-height: 1.5;
+        }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #f1f5f9; padding: 12px; text-align: left; font-size: 14px; }
+        td { padding: 12px; border-bottom: 1px solid #edf2f7; }
+
+        .product-info { display: flex; gap: 12px; align-items: center; }
+        .product-img {
+            width: 50px; height: 50px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Total */
+        .total-section { display: flex; justify-content: flex-end; margin-top: 20px; }
+        .total-box { width: 300px; }
+        .total-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .final-row {
+            display: flex; justify-content: space-between;
+            padding-top: 10px; border-top: 2px solid #eee;
+            font-size: 18px; font-weight: bold; color: #e53e3e;
+        }
+
+        /* Request cancel */
+        .action-area {
+            background: #fff5f5;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px dashed #fc8181;
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn { padding: 10px 20px; border-radius: 6px; cursor: pointer; border: none; color: #fff; font-weight: bold; }
+        .btn-approve { background: #48bb78; }
+        .btn-reject { background: #f56565; }
+
+        /* Logs */
+        .action-badge {
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            background: #edf2f7;
+            color: #2d3748;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h2>
+            Đơn hàng #<span th:text="${order.id}"></span>
+            <span class="status-badge"
+                  th:classappend="${
+                    order.status == 'PENDING' ? 'status-pending' :
+                    order.status == 'CONFIRMED' ? 'status-confirmed' :
+                    order.status == 'SHIPPING' ? 'status-shipping' :
+                    order.status == 'COMPLETED' ? 'status-completed' :
+                    order.status == 'CANCEL_REQUESTED' ? 'status-request' : 'status-cancelled'
+                 }"
+                  style="margin-left: 10px;"
+                  th:text="${
+                    order.status == 'PENDING' ? '⏳ Chờ xử lý' :
+                    order.status == 'CONFIRMED' ? '📦 Đã xác nhận' :
+                    order.status == 'SHIPPING' ? '🚚 Đang giao' :
+                    order.status == 'COMPLETED' ? '🎉 Hoàn thành' :
+                    order.status == 'CANCEL_REQUESTED' ? '⚠️ Yêu cầu hủy' : '❌ Đã hủy'
+                 }"></span>
+        </h2>
+
+        <a href="/admin/orders" class="back-btn">← Quay lại</a>
+    </div>
+
+    <!-- INFO -->
+    <div class="section">
+        <div class="section-title">📌 Thông tin nhận hàng</div>
+
+        <div class="info-grid">
+            <div class="info-box">
+                <div class="label">Người nhận</div>
+                <div class="value"
+                     th:text="${order.user != null ? (order.user.fullName != null ? order.user.fullName : order.user.username) : 'N/A'}">
+                </div>
+                <small style="color:#666;margin-top:4px;display:block;" th:text="${order.phone}"></small>
+            </div>
+
+            <div class="info-box">
+                <div class="label">Địa chỉ</div>
+                <div class="value" th:text="${order.address}"></div>
+            </div>
+
+            <div class="info-box">
+                <div class="label">Ngày đặt hàng</div>
+                <div class="value" th:text="${#temporals.format(order.createdAt, 'HH:mm dd/MM/yyyy')}"></div>
+            </div>
+        </div>
+
+        <!-- GHI CHÚ -->
+        <div th:if="${order.note != null && order.note != ''}" class="note-box">
+            <strong>📝 Ghi chú:</strong>
+            <div th:each="line : ${#strings.split(order.note, '|')}">
+                <div th:text="${line}"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="section">
+        <div class="section-title">📦 Sản phẩm</div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Sản phẩm</th>
+                <th style="width: 80px; text-align:center;">SL</th>
+                <th style="width: 150px; text-align:right;">Đơn giá</th>
+                <th style="width: 150px; text-align:right;">Thành tiền</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="item : ${order.orderItems}">
+                <td>
+                    <div class="product-info">
+                        <img th:src="@{'/images/' + ${item.product.imageUrl}}"
+                             class="product-img"
+                             onerror="this.src='https://via.placeholder.com/50'">
+                        <span th:text="${item.product.name}"></span>
+                    </div>
+                </td>
+
+                <td style="text-align:center;" th:text="${item.quantity}"></td>
+
+                <td style="text-align:right;"
+                    th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + '₫'"></td>
+
+                <td style="text-align:right;font-weight:bold;"
+                    th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + '₫'"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- TOTAL -->
+        <div class="total-section">
+            <div class="total-box">
+                <div class="total-row">
+                    <span>Tổng tiền hàng:</span>
+                    <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                </div>
+
+                <div class="final-row">
+                    <span>Tổng thanh toán:</span>
+                    <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CANCEL REQUEST -->
+    <div class="action-area" th:if="${order.status == 'CANCEL_REQUESTED'}">
+        <div>
+            <h3 style="color:#c53030;margin-bottom:5px;">⚠️ Yêu cầu hủy đơn</h3>
+            <p>Khách hàng muốn hủy đơn này.</p>
+        </div>
+
+        <div style="display:flex;gap:10px;">
+            <form th:action="@{/admin/orders/{id}/approve-cancel(id=${order.id})}" method="post">
+                <button class="btn btn-approve" onclick="return confirm('Xác nhận hủy?')">✔ Đồng ý hủy</button>
+            </form>
+
+            <form th:action="@{/admin/orders/{id}/reject-cancel(id=${order.id})}" method="post">
+                <button class="btn btn-reject" onclick="return confirm('Từ chối hủy?')">✖ Từ chối</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- LOG TABLE -->
+    <div class="section" th:if="${logs != null && not #lists.isEmpty(logs)}">
+        <div class="section-title">📝 Lịch sử xử lý</div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Thời gian</th>
+                <th>Hành động</th>
+                <th>Người thực hiện</th>
+                <th>Chi tiết</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="log : ${logs}">
+                <td th:text="${#temporals.format(log.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                <td><span class="action-badge" th:text="${log.action}"></span></td>
+                <td th:text="${log.actor}"></td>
+                <td th:text="${log.description}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>
