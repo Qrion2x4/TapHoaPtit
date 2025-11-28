@@ -5,6 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - TapHoaPtit.online</title>
     <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <style>
+        .password-input-wrapper {
+            position: relative;
+        }
+        
+        .password-input-wrapper input {
+            padding-right: 45px !important;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 20px;
+            user-select: none;
+            transition: all 0.3s;
+        }
+        
+        .toggle-password:hover {
+            transform: translateY(-50%) scale(1.2);
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -26,12 +50,15 @@
             
             <div class="form-group">
                 <label for="password">🔒 Mật khẩu:</label>
-                <input type="password" 
-                       id="password" 
-                       name="password" 
-                       placeholder="Nhập mật khẩu..." 
-                       required 
-                       autocomplete="current-password">
+                <div class="password-input-wrapper">
+                    <input type="password" 
+                           id="password" 
+                           name="password" 
+                           placeholder="Nhập mật khẩu..." 
+                           required 
+                           autocomplete="current-password">
+                    <span class="toggle-password" onclick="togglePassword('password')">👁️</span>
+                </div>
             </div>
             
             <div class="forgot-password">
@@ -46,5 +73,20 @@
             <p><a href="/">← Về trang chủ</a></p>
         </div>
     </div>
+    
+    <script>
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = field.nextElementSibling;
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.textContent = '🙈';
+            } else {
+                field.type = 'password';
+                icon.textContent = '👁️';
+            }
+        }
+    </script>
 </body>
 </html>
