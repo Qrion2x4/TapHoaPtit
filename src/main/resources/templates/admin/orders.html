@@ -254,6 +254,9 @@
                 </td>
                 <td>
                     <div class="action-group">
+                        <a th:href="@{/admin/orders/{id}(id=${order.id})}" class="btn-detail">
+                            👁 Xem chi tiết
+                        </a>
 
                         <div th:if="${order.status == 'CANCEL_REQUESTED'}" style="display: flex; gap: 5px; flex-direction: column;">
                             <div style="font-size: 11px; color: #d35400; font-weight: bold; margin-bottom: 3px;">

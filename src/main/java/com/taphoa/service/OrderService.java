@@ -233,22 +233,22 @@ public class OrderService {
     public void rejectCancel(Long orderId) {
         Order order = orderRepository.findById(orderId).orElse(null);
 
-        // Chỉ từ chối nếu đơn đang ở trạng thái Yêu cầu hủy
+
         if (order != null && "CANCEL_REQUESTED".equals(order.getStatus())) {
 
-            // 1. Khôi phục về trạng thái Đã xác nhận (để tiếp tục giao hàng)
+
             order.setStatus("CONFIRMED");
 
-            // 2. --- LOGIC MỚI: CẬP NHẬT GHI CHÚ ---
-            String oldNote = order.getNote() != null ? order.getNote() : "";
-            String rejectMessage = "Shop đã từ chối yêu cầu hủy đơn"; // Nội dung bạn muốn ghi
 
-            // Nối ghi chú mới vào sau ghi chú cũ
+            String oldNote = order.getNote() != null ? order.getNote() : "";
+            String rejectMessage = "Shop đã từ chối yêu cầu hủy đơn";
+
+
             String newNote = oldNote.isEmpty() ? rejectMessage : oldNote + " | " + rejectMessage;
             order.setNote(newNote);
-            // -------------------------------------
 
-            // 3. Lưu xuống Database
+
+
             orderRepository.save(order);
 
             System.out.println("❌ Admin rejected cancel for order #" + orderId);
