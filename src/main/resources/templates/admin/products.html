@@ -223,6 +223,8 @@
             </thead>
             <tbody>
             <tr th:each="product : ${products}">
+                <td th:text="${product.id}">1</td>   <!-- THÊM ID ĐÚNG CHỖ -->
+
                 <td>
                     <img th:if="${!product.imageUrl.startsWith('/')}"
                          th:src="@{'/images/' + ${product.imageUrl}}"
@@ -236,7 +238,8 @@
                          alt="Ảnh SP">
                 </td>
 
-                <td th:text="${product.name}">Gạo ST25</td>
+                <td th:text="${product.name}"></td>
+
                 <td th:text="${product.category}">Thực phẩm</td>
                 <td>
                     <span class="price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '₫'">119,000₫</span>
