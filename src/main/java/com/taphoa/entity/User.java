@@ -13,7 +13,7 @@ public class User {
     private Long id;
     
     @Column(nullable = false)
-    private String role = "USER"; // USER, ADMIN
+    private String role = "USER";
 
     @Column(unique = true, nullable = false)
     private String username;
@@ -28,7 +28,7 @@ public class User {
     private String phone;
     private String address;
     
-    // ✅ THÊM MỚI: Xác thực email
+
     @Column(name = "email_verified")
     private boolean emailVerified = false;
     
@@ -38,7 +38,7 @@ public class User {
     @Column(name = "verification_token_expiry")
     private LocalDateTime verificationTokenExpiry;
     
-    // ✅ THÊM MỚI: Reset password
+
     @Column(name = "reset_password_token")
     private String resetPasswordToken;
     

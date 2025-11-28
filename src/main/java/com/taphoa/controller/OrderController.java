@@ -141,85 +141,67 @@ public class OrderController {
             return "redirect:/cart";
         }
     }
-    
+
     /**
-     * ✅ HỦY ĐƠN HÀNG - CUSTOMER
+     * ✅ HỦY ĐƠN HÀNG (ĐÃ CẬP NHẬT GỌI SERVICE)
      */
     @PostMapping("/cancel/{orderId}")
     public String cancelOrder(@PathVariable Long orderId,
-                             HttpSession session,
-                             RedirectAttributes redirectAttributes) {
+                              @RequestParam(required = false) String reason, // Nhận lý do
+                              @RequestParam(required = false) String note,   // Nhận chi tiết
+                              HttpSession session,
+                              RedirectAttributes redirectAttributes) {
         Long userId = (Long) session.getAttribute("userId");
-        
-        System.out.println("=== CANCEL ORDER REQUEST ===");
-        System.out.println("Order ID: " + orderId);
-        System.out.println("User ID: " + userId);
-        
+
         if (userId == null) {
             return "redirect:/login";
         }
-        
+
         try {
             User user = userService.getUserById(userId);
             Order order = orderService.getOrderById(orderId);
-            
-            // Kiểm tra đơn hàng có tồn tại không
+
+            // Kiểm tra tồn tại
             if (order == null) {
                 redirectAttributes.addFlashAttribute("error", "❌ Không tìm thấy đơn hàng!");
                 return "redirect:/my-orders";
             }
-            
-            // Kiểm tra quyền sở hữu đơn hàng
+
+            // Kiểm tra quyền sở hữu
             if (!order.getUser().getId().equals(userId)) {
                 redirectAttributes.addFlashAttribute("error", "❌ Bạn không có quyền hủy đơn hàng này!");
                 return "redirect:/my-orders";
             }
-            
+
             String currentStatus = order.getStatus();
-            System.out.println("Current status: " + currentStatus);
-            
-            // ✅ LOGIC HỦY ĐƠN
+
+            // --- XỬ LÝ HỦY ĐƠN ---
             if ("PENDING".equals(currentStatus)) {
-                // Đơn chưa xác nhận → Hủy trực tiếp
+                // Đơn mới -> Hủy ngay lập tức
                 orderService.updateOrderStatus(orderId, "CANCELLED");
-                redirectAttributes.addFlashAttribute("success", 
-                    "✅ Đã hủy đơn hàng #" + orderId + " thành công!");
-                System.out.println("✅ Order cancelled directly (PENDING)");
-                
+                redirectAttributes.addFlashAttribute("success", "✅ Đã hủy đơn hàng thành công!");
+
             } else if ("CONFIRMED".equals(currentStatus)) {
-                // Đơn đã xác nhận → Đổi sang CANCEL_REQUESTED (chờ admin duyệt)
-                orderService.updateOrderStatus(orderId, "CANCEL_REQUESTED");
-                redirectAttributes.addFlashAttribute("warning", 
-                    "⏳ Đã gửi yêu cầu hủy đơn hàng #" + orderId + ". Vui lòng đợi xác nhận từ cửa hàng!");
-                System.out.println("⏳ Cancel request sent (CONFIRMED)");
-                
+                // Đơn đã xác nhận -> Gọi Service để lưu lý do và chuyển trạng thái chờ duyệt
+                // Hàm này bạn vừa thêm vào OrderService ở bước trước
+                orderService.requestCancelOrder(orderId, reason, note);
+
+                redirectAttributes.addFlashAttribute("warning",
+                        "⏳ Đã gửi yêu cầu hủy đơn hàng. Vui lòng đợi cửa hàng xác nhận!");
+
             } else if ("SHIPPING".equals(currentStatus)) {
-                // Đơn đang giao → Không cho hủy
-                redirectAttributes.addFlashAttribute("error", 
-                    "❌ Không thể hủy đơn hàng #" + orderId + " vì đơn hàng đang được giao!");
-                System.out.println("❌ Cannot cancel (SHIPPING)");
-                
+                redirectAttributes.addFlashAttribute("error", "❌ Đơn hàng đang giao, không thể hủy!");
+
             } else if ("COMPLETED".equals(currentStatus)) {
-                // Đơn đã giao thành công → Không cho hủy
-                redirectAttributes.addFlashAttribute("error", 
-                    "❌ Không thể hủy đơn hàng #" + orderId + " vì đơn hàng đã hoàn thành!");
-                System.out.println("❌ Cannot cancel (COMPLETED)");
-                
-            } else if ("CANCELLED".equals(currentStatus) || "CANCEL_REQUESTED".equals(currentStatus)) {
-                // Đơn đã hủy hoặc đang chờ hủy
-                redirectAttributes.addFlashAttribute("info", 
-                    "ℹ️ Đơn hàng #" + orderId + " đã được hủy hoặc đang chờ xử lý!");
-                System.out.println("ℹ️ Already cancelled or pending");
-                
+                redirectAttributes.addFlashAttribute("error", "❌ Đơn hàng đã hoàn thành, không thể hủy!");
+
             } else {
-                redirectAttributes.addFlashAttribute("error", 
-                    "❌ Không thể hủy đơn hàng #" + orderId + " ở trạng thái hiện tại!");
+                redirectAttributes.addFlashAttribute("info", "ℹ️ Đơn hàng đã hủy hoặc đang chờ xử lý.");
             }
-            
+
             return "redirect:/my-orders";
-            
+
         } catch (Exception e) {
-            System.out.println("❌ ERROR cancelling order: " + e.getMessage());
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "❌ Có lỗi xảy ra: " + e.getMessage());
             return "redirect:/my-orders";

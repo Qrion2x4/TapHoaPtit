@@ -529,6 +529,113 @@
             color: #b2bec3;
             font-size: 14px;
         }
+        .modal {
+            display: none; /* Mặc định ẩn */
+            position: fixed;
+            z-index: 9999; /* Luôn nổi trên cùng */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5); /* Màu đen mờ */
+            backdrop-filter: blur(4px); /* Làm mờ nền sau */
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+            animation: slideDown 0.3s ease-out;
+            position: relative;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+            font-size: 13px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+            background: #fff;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-control[readonly] {
+            background-color: #f8f9fa;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .btn-close {
+            cursor: pointer;
+            font-size: 24px;
+            line-height: 1;
+            opacity: 0.8;
+        }
+
+        .btn-close:hover { opacity: 1; }
+
+        .btn-confirm-modal {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-confirm-modal:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
     </style>
 </head>
 <body>
@@ -688,14 +795,13 @@
                             </form>
                             
                             <!-- Đơn CONFIRMED: Yêu cầu hủy -->
-                            <form th:if="${order.status == 'CONFIRMED'}" 
-                                  th:action="@{/order/cancel/{id}(id=${order.id})}" 
-                                  method="post"
-                                  onsubmit="return confirm('Gửi yêu cầu hủy đơn hàng? Cửa hàng sẽ xem xét và phản hồi sớm nhất.');">
-                                <button type="submit" class="btn-request-cancel">
+                            <div th:if="${order.status == 'CONFIRMED'}">
+                                <button type="button"
+                                        class="btn-request-cancel"
+                                        th:onclick="'openCancelModal(' + ${order.id} + ')'">
                                     ⏳ Yêu cầu hủy đơn
                                 </button>
-                            </form>
+                            </div>
                             
                             <!-- Đơn CANCEL_REQUESTED: Hiển thị thông báo -->
                             <div th:if="${order.status == 'CANCEL_REQUESTED'}" 
@@ -739,5 +845,94 @@
             © 2025 TapHoaPtit.online - Tạp hóa trực tuyến
         </div>
     </div>
+
+    <div id="cancelModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>📝 Xác nhận yêu cầu hủy</span>
+                <span class="btn-close" onclick="closeCancelModal()">×</span>
+            </div>
+
+            <form id="cancelForm" method="post">
+                <div class="modal-body">
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <div style="flex: 1;">
+                            <label class="form-label">Ngày yêu cầu</label>
+                            <input type="text" id="currentDate" class="form-control" readonly style="background: #f8f9fa;">
+                        </div>
+                        <div style="flex: 1;">
+                            <label class="form-label">Người hủy</label>
+                            <input type="text" value="Khách hàng" class="form-control" readonly style="background: #f8f9fa;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Lý do hủy đơn *</label>
+                        <select name="reason" class="form-control" required onchange="toggleOtherReason(this)">
+                            <option value="">-- Chọn lý do --</option>
+                            <option value="Đặt nhầm sản phẩm">Đặt nhầm sản phẩm</option>
+                            <option value="Muốn thay đổi địa chỉ/SĐT">Muốn thay đổi địa chỉ/SĐT</option>
+                            <option value="Muốn đổi sản phẩm khác">Muốn đổi sản phẩm khác</option>
+                            <option value="Thấy chỗ khác rẻ hơn">Thấy chỗ khác rẻ hơn</option>
+                            <option value="Không còn nhu cầu nữa">Không còn nhu cầu nữa</option>
+                            <option value="Khác">Lý do khác...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="otherReasonBox" style="display: none;">
+                        <label class="form-label">Chi tiết lý do *</label>
+                        <textarea name="note" class="form-control" rows="3" placeholder="Vui lòng ghi rõ lý do..."></textarea>
+                    </div>
+
+                    <p style="font-size: 12px; color: #666; margin-bottom: 20px;">
+                        ⚠️ Lưu ý: Yêu cầu này sẽ được gửi đến cửa hàng để duyệt.
+                    </p>
+
+                    <button type="submit" class="btn-confirm-modal">Gửi yêu cầu hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 1. Mở Modal và cập nhật ID đơn hàng vào Form
+        function openCancelModal(orderId) {
+            // Cập nhật đường dẫn action cho form: /order/cancel/{id}
+            document.getElementById('cancelForm').action = '/order/cancel/' + orderId;
+
+            // Điền ngày hiện tại
+            const today = new Date();
+            document.getElementById('currentDate').value = today.toLocaleDateString('vi-VN');
+
+            // Hiện modal
+            document.getElementById('cancelModal').style.display = 'flex';
+        }
+
+        // 2. Đóng Modal
+        function closeCancelModal() {
+            document.getElementById('cancelModal').style.display = 'none';
+        }
+
+        // 3. Đóng khi click ra ngoài
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('cancelModal')) {
+                closeCancelModal();
+            }
+        }
+
+        // 4. Hiện ô nhập text nếu chọn "Lý do khác"
+        function toggleOtherReason(select) {
+            const otherBox = document.getElementById('otherReasonBox');
+            const textArea = otherBox.querySelector('textarea');
+
+            if (select.value === 'Khác') {
+                otherBox.style.display = 'block';
+                textArea.required = true;
+            } else {
+                otherBox.style.display = 'none';
+                textArea.required = false;
+            }
+        }
+    </script>
 </body>
 </html>

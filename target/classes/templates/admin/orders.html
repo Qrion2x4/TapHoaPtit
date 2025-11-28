@@ -237,23 +237,46 @@
                     500,000₫
                 </td>
                 <td>
-                    <span class="status-badge"
-                          th:classappend="${order.status == 'PENDING' ? 'status-pending' :
-                                           order.status == 'CONFIRMED' ? 'status-confirmed' :
-                                           order.status == 'SHIPPING' ? 'status-shipping' :
-                                           order.status == 'COMPLETED' ? 'status-completed' : 'status-cancelled'}"
-                          th:text="${order.status == 'PENDING' ? 'Chờ xử lý' :
-                                   order.status == 'CONFIRMED' ? 'Đã xác nhận' :
-                                   order.status == 'SHIPPING' ? 'Đang giao' :
-                                   order.status == 'COMPLETED' ? 'Hoàn thành' : 'Đã hủy'}">
+                   <span class="status-badge"
+                         th:classappend="${order.status == 'PENDING' ? 'status-pending' :
+                       order.status == 'CONFIRMED' ? 'status-confirmed' :
+                       order.status == 'SHIPPING' ? 'status-shipping' :
+                       order.status == 'COMPLETED' ? 'status-completed' :
+                       order.status == 'CANCEL_REQUESTED' ? 'status-pending' : 'status-cancelled'}"
+                         th:text="${order.status == 'PENDING' ? 'Chờ xử lý' :
+               order.status == 'CONFIRMED' ? 'Đã xác nhận' :
+               order.status == 'SHIPPING' ? 'Đang giao' :
+               order.status == 'COMPLETED' ? 'Hoàn thành' :
+               order.status == 'CANCEL_REQUESTED' ? 'Chờ xử lý hủy' : 'Đã hủy'}">
                     </span>
                     <div style="font-size: 11px; color: #999; margin-top: 5px;"
                          th:text="${#temporals.format(order.createdAt, 'HH:mm dd/MM')}"></div>
                 </td>
                 <td>
                     <div class="action-group">
-                        <a href="#" class="btn-detail">👁️ Xem chi tiết</a>
-                        <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="status-form">
+
+                        <div th:if="${order.status == 'CANCEL_REQUESTED'}" style="display: flex; gap: 5px; flex-direction: column;">
+                            <div style="font-size: 11px; color: #d35400; font-weight: bold; margin-bottom: 3px;">
+                                ⚠️ Khách muốn hủy!
+                            </div>
+
+                            <form th:action="@{/admin/orders/{id}/approve-cancel(id=${order.id})}" method="post">
+                                <button type="submit" class="btn-save" style="background: #27ae60; width: 100%;"
+                                        onclick="return confirm('Chấp nhận hủy đơn hàng này?')">
+                                    ✓ Duyệt hủy
+                                </button>
+                            </form>
+
+                            <form th:action="@{/admin/orders/{id}/reject-cancel(id=${order.id})}" method="post">
+                                <button type="submit" class="btn-save" style="background: #e74c3c; width: 100%;"
+                                        onclick="return confirm('Từ chối yêu cầu hủy và tiếp tục đơn hàng?')">
+                                    ✕ Từ chối
+                                </button>
+                            </form>
+                        </div>
+
+                        <form th:unless="${order.status == 'CANCEL_REQUESTED'}"
+                              th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="status-form">
                             <select name="status" class="status-select">
                                 <option value="PENDING" th:selected="${order.status == 'PENDING'}">Chờ xử lý</option>
                                 <option value="CONFIRMED" th:selected="${order.status == 'CONFIRMED'}">Đã xác nhận</option>

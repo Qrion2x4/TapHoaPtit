@@ -8,6 +8,7 @@ import com.taphoa.service.OrderService;
 import com.taphoa.service.ProductService;
 import com.taphoa.service.UserService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
@@ -432,67 +433,35 @@ public class AdminController {
         return "redirect:/admin/products";
     }
 
-        /**
-     * ✅ XÁC NHẬN HỦY ĐƠN (ADMIN DUYỆT YÊU CẦU HỦY)
-     */
-    @PostMapping("/orders/{id}/approve-cancel")
-    public String approveCancelOrder(@PathVariable Long id,
-                                    HttpSession session,
-                                    RedirectAttributes redirectAttributes) {
-        if (!isAdmin(session)) {
-            return "redirect:/login";
-        }
-        
-        try {
-            Order order = orderRepository.findById(id).orElse(null);
-            
-            if (order != null && "CANCEL_REQUESTED".equals(order.getStatus())) {
-                order.setStatus("CANCELLED");
-                orderRepository.save(order);
-                
-                System.out.println("✅ Admin approved cancel request for order #" + id);
-                redirectAttributes.addFlashAttribute("success", "✅ Đã xác nhận hủy đơn hàng #" + id);
-            } else {
-                redirectAttributes.addFlashAttribute("error", "❌ Không thể hủy đơn hàng này!");
+
+// 1. DUYỆT YÊU CẦU HỦY (GỌI SERVICE)
+        @PostMapping("/orders/{id}/approve-cancel")
+        public String approveCancelOrder(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+            if (!isAdmin(session)) return "redirect:/login";
+
+            try {
+                orderService.approveCancel(id); // <--- Gọi Service
+                redirectAttributes.addFlashAttribute("success", "Đã duyệt hủy đơn hàng #" + id);
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "❌ Lỗi: " + e.getMessage());
+            return "redirect:/admin/orders";
         }
-        
+
+    // 2. TỪ CHỐI YÊU CẦU HỦY (GỌI SERVICE)
+    @PostMapping("/orders/{id}/reject-cancel")
+    public String rejectCancelOrder(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!isAdmin(session)) return "redirect:/login";
+
+        try {
+            orderService.rejectCancel(id); // <--- Gọi Service
+            redirectAttributes.addFlashAttribute("success", "Đã từ chối yêu cầu hủy đơn #" + id);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+        }
         return "redirect:/admin/orders";
     }
 
-    /**
-     * ✅ TỪ CHỐI HỦY ĐƠN (ADMIN TỪ CHỐI YÊU CẦU)
-     */
-    @PostMapping("/orders/{id}/reject-cancel")
-    public String rejectCancelOrder(@PathVariable Long id,
-                                    HttpSession session,
-                                    RedirectAttributes redirectAttributes) {
-        if (!isAdmin(session)) {
-            return "redirect:/login";
-        }
-        
-        try {
-            Order order = orderRepository.findById(id).orElse(null);
-            
-            if (order != null && "CANCEL_REQUESTED".equals(order.getStatus())) {
-                // Trả lại trạng thái CONFIRMED
-                order.setStatus("CONFIRMED");
-                orderRepository.save(order);
-                
-                System.out.println("❌ Admin rejected cancel request for order #" + id);
-                redirectAttributes.addFlashAttribute("success", "✅ Đã từ chối yêu cầu hủy đơn hàng #" + id);
-            } else {
-                redirectAttributes.addFlashAttribute("error", "❌ Không thể xử lý yêu cầu này!");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "❌ Lỗi: " + e.getMessage());
-        }
-        
-        return "redirect:/admin/orders";
-    }
+
 
 }

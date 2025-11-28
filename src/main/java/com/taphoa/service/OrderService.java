@@ -180,4 +180,67 @@ public class OrderService {
     public long countOrdersByStatus(String status) {
         return orderRepository.findByStatus(status).size();
     }
+
+
+    @Transactional
+    public void requestCancelOrder(Long orderId, String reason, String note) throws Exception {
+        // 1. Tìm đơn hàng
+        Order order = orderRepository.findById(orderId).orElse(null);
+
+        if (order == null) {
+            throw new Exception("Không tìm thấy đơn hàng!");
+        }
+
+        // 2. Xử lý logic ghép chuỗi lý do (Giống hệt bên Controller cũ)
+        String fullReason = "Khách hủy: " + (reason != null ? reason : "Lý do khác");
+
+        // Nếu có ghi chú thêm thì nối vào
+        if (note != null && !note.isEmpty()) {
+            fullReason += " (" + note + ")";
+        }
+
+        // 3. Cập nhật vào Ghi chú đơn hàng (giữ lại ghi chú cũ nếu có)
+        String oldNote = order.getNote() != null ? order.getNote() : "";
+        String newNote = oldNote.isEmpty() ? fullReason : oldNote + " | " + fullReason;
+        order.setNote(newNote);
+
+        // 4. Đổi trạng thái sang Chờ Hủy
+        order.setStatus("CANCEL_REQUESTED");
+
+        // 5. Lưu xuống DB
+        orderRepository.save(order);
+
+        System.out.println("✅ Đã cập nhật yêu cầu hủy cho đơn #" + orderId + ": " + fullReason);
+    }
+
+    @Transactional
+    public void approveCancel(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+
+        // Chỉ duyệt nếu đơn đang ở trạng thái Yêu cầu hủy
+        if (order != null && "CANCEL_REQUESTED".equals(order.getStatus())) {
+            order.setStatus("CANCELLED");
+            orderRepository.save(order);
+
+            // (Tùy chọn) Nếu bạn có logic hoàn kho (cộng lại kho), hãy viết ở đây
+            // restoreStock(order);
+
+            System.out.println("✅ Admin approved cancel for order #" + orderId);
+        }
+    }
+
+    @Transactional
+    public void rejectCancel(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+
+        // Chỉ từ chối nếu đơn đang ở trạng thái Yêu cầu hủy
+        if (order != null && "CANCEL_REQUESTED".equals(order.getStatus())) {
+            // Khôi phục về trạng thái Đã xác nhận (để tiếp tục giao hàng)
+            order.setStatus("CONFIRMED");
+            orderRepository.save(order);
+
+            System.out.println("❌ Admin rejected cancel for order #" + orderId);
+        }
+    }
+
 }

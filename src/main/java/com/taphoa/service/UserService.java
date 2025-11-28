@@ -20,21 +20,19 @@ public class UserService {
     
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     
-    /**
-     * Đăng ký user mới với xác thực email
-     */
+
     public User registerUser(String username, String password, String email, String fullName, String phone) {
-        // Kiểm tra username
+
         if (userRepository.existsByUsername(username)) {
             throw new RuntimeException("Tên đăng nhập đã tồn tại!");
         }
         
-        // Kiểm tra email
+
         if (userRepository.existsByEmail(email)) {
             throw new RuntimeException("Email đã được sử dụng!");
         }
         
-        // Tạo user mới
+
         User user = new User();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
@@ -42,16 +40,16 @@ public class UserService {
         user.setFullName(fullName);
         user.setPhone(phone);
         
-        // Tạo verification token
+
         String token = UUID.randomUUID().toString();
         user.setVerificationToken(token);
         user.setVerificationTokenExpiry(LocalDateTime.now().plusHours(24)); // Hết hạn sau 24h
         user.setEmailVerified(false);
         
-        // Lưu user
+
         User savedUser = userRepository.save(user);
         
-        // Gửi email xác thực
+
         try {
             emailService.sendVerificationEmail(email, username, token);
             System.out.println("✅ Đã gửi email xác thực đến: " + email);
@@ -89,10 +87,7 @@ public class UserService {
         return true;
     }
     
-    /**
-     * Đăng nhập - CHỈ cho phép nếu đã xác thực email (TRỪ ADMIN)
-     * ✅ ADMIN không cần xác thực email
-     */
+
     public User authenticate(String username, String password) {
         Optional<User> userOpt = userRepository.findByUsername(username);
         
@@ -116,9 +111,7 @@ public class UserService {
         return user;
     }
     
-    /**
-     * Yêu cầu reset mật khẩu - gửi email với token
-     */
+
     public void requestPasswordReset(String email) {
         Optional<User> userOpt = userRepository.findByEmail(email);
         
