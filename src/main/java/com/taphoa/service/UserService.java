@@ -55,15 +55,13 @@ public class UserService {
             System.out.println("✅ Đã gửi email xác thực đến: " + email);
         } catch (Exception e) {
             System.err.println("❌ Lỗi gửi email: " + e.getMessage());
-            // Vẫn cho phép đăng ký thành công dù email fail
+
         }
         
         return savedUser;
     }
     
-    /**
-     * Xác thực email bằng token
-     */
+
     public boolean verifyEmail(String token) {
         Optional<User> userOpt = userRepository.findByVerificationToken(token);
         
@@ -73,12 +71,12 @@ public class UserService {
         
         User user = userOpt.get();
         
-        // Kiểm tra token còn hạn không
+
         if (user.getVerificationTokenExpiry().isBefore(LocalDateTime.now())) {
-            return false; // Token hết hạn
+            return false;
         }
         
-        // Xác thực thành công
+
         user.setEmailVerified(true);
         user.setVerificationToken(null);
         user.setVerificationTokenExpiry(null);
@@ -97,13 +95,12 @@ public class UserService {
         
         User user = userOpt.get();
         
-        // Kiểm tra password
+
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Tên đăng nhập hoặc mật khẩu không đúng!");
         }
         
-        // ⚠️ QUAN TRỌNG: Kiểm tra đã xác thực email chưa
-        // ✅ ADMIN được bỏ qua yêu cầu xác thực email
+
         if (!user.isEmailVerified() && !"ADMIN".equals(user.getRole())) {
             throw new RuntimeException("Tài khoản chưa được xác thực! Vui lòng kiểm tra email để xác thực tài khoản.");
         }
@@ -121,7 +118,7 @@ public class UserService {
         
         User user = userOpt.get();
         
-        // Tạo reset token
+
         String token = UUID.randomUUID().toString();
         user.setResetPasswordToken(token);
         user.setResetPasswordTokenExpiry(LocalDateTime.now().plusHours(1)); // Hết hạn sau 1h
@@ -132,9 +129,7 @@ public class UserService {
         emailService.sendResetPasswordEmail(email, user.getUsername(), token);
     }
     
-    /**
-     * Xác thực reset password token
-     */
+
     public User validateResetToken(String token) {
         Optional<User> userOpt = userRepository.findByResetPasswordToken(token);
         
@@ -144,7 +139,7 @@ public class UserService {
         
         User user = userOpt.get();
         
-        // Kiểm tra token còn hạn không
+
         if (user.getResetPasswordTokenExpiry().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("Token đã hết hạn! Vui lòng yêu cầu reset mật khẩu lại.");
         }
@@ -152,46 +147,39 @@ public class UserService {
         return user;
     }
     
-    /**
-     * Reset mật khẩu với token
-     */
+
     public void resetPassword(String token, String newPassword) {
         User user = validateResetToken(token);
-        
-        // Cập nhật mật khẩu mới
+
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setResetPasswordToken(null);
         user.setResetPasswordTokenExpiry(null);
         
         userRepository.save(user);
         
-        // Gửi email thông báo
+
         emailService.sendPasswordChangedEmail(user.getEmail(), user.getUsername());
     }
     
-    /**
-     * Đổi mật khẩu (khi đã đăng nhập)
-     */
+
     public void changePassword(Long userId, String oldPassword, String newPassword) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("Không tìm thấy user!"));
         
-        // Kiểm tra mật khẩu cũ
+
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new RuntimeException("Mật khẩu cũ không đúng!");
         }
         
-        // Cập nhật mật khẩu mới
+
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
         
-        // Gửi email thông báo
+
         emailService.sendPasswordChangedEmail(user.getEmail(), user.getUsername());
     }
     
-    /**
-     * Gửi lại email xác thực
-     */
+
     public void resendVerificationEmail(String email) {
         Optional<User> userOpt = userRepository.findByEmail(email);
         
@@ -205,14 +193,14 @@ public class UserService {
             throw new RuntimeException("Email đã được xác thực rồi!");
         }
         
-        // Tạo token mới
+
         String token = UUID.randomUUID().toString();
         user.setVerificationToken(token);
         user.setVerificationTokenExpiry(LocalDateTime.now().plusHours(24));
         
         userRepository.save(user);
         
-        // Gửi email
+
         emailService.sendVerificationEmail(email, user.getUsername(), token);
     }
     

@@ -13,20 +13,20 @@ public class Coupon {
     private Long id;
     
     @Column(nullable = false, unique = true)
-    private String code; // VD: NEWBIE, SUMMER2025
+    private String code;
     
     @Column(nullable = false)
-    private String name; // Tên mã giảm giá
+    private String name;
     
     @Column(nullable = false)
-    private Double discountPercent; // % giảm giá (10 = 10%)
+    private Double discountPercent;
     
-    private Double maxDiscount; // Giảm tối đa (VD: 50000đ)
+    private Double maxDiscount;
     
-    private Double minOrderAmount; // Đơn tối thiểu (VD: 100000đ)
+    private Double minOrderAmount;
     
     @Column(nullable = false)
-    private Boolean active = true; // Còn hiệu lực không
+    private Boolean active = true;
     
     @Column(name = "valid_from")
     private LocalDateTime validFrom;

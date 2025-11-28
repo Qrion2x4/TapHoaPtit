@@ -26,24 +26,23 @@ public class Order {
     @Column(length = 1000)
     private String note;
     
-    // ✅ THÊM MỚI: Tổng tiền GỐC (trước giảm giá)
+
     @Column(name = "subtotal_amount")
     private Double subtotalAmount;
     
-    // ✅ THÊM MỚI: Số tiền giảm
+
     @Column(name = "discount_amount")
     private Double discountAmount = 0.0;
     
-    // ✅ THÊM MỚI: Mã coupon đã dùng
+
     @Column(name = "coupon_code")
     private String couponCode;
-    
-    // Tổng tiền SAU GIẢM (totalAmount = subtotalAmount - discountAmount)
+
     @Column(nullable = false)
     private Double totalAmount;
     
     @Column(nullable = false)
-    private String status = "PENDING"; // PENDING, CONFIRMED, SHIPPING, COMPLETED, CANCELLED
+    private String status = "PENDING";
     
     @Column(name = "created_at")
     private LocalDateTime createdAt;

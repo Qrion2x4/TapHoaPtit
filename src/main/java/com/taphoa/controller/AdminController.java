@@ -1,11 +1,9 @@
 package com.taphoa.controller;
 
 import com.taphoa.entity.Order;
-import com.taphoa.entity.OrderLog;
 import com.taphoa.entity.Product;
 import com.taphoa.entity.User;
 import com.taphoa.repository.OrderRepository;
-import com.taphoa.service.OrderLogService;
 import com.taphoa.service.OrderService;
 import com.taphoa.service.ProductService;
 import com.taphoa.service.UserService;
@@ -44,9 +42,6 @@ public class AdminController {
 
     @Autowired
     private OrderRepository orderRepository;
-
-    @Autowired
-    private OrderLogService orderLogService;
 
     private boolean isAdmin(HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
@@ -239,50 +234,36 @@ public class AdminController {
 
     @PostMapping("/orders/{id}/status")
     public String updateOrderStatus(@PathVariable Long id,
-                                    @RequestParam String status,
-                                    HttpSession session,
+                                    @RequestParam("status") String status,
                                     RedirectAttributes redirectAttributes) {
-        if (!isAdmin(session)) {
-            return "redirect:/login";
-        }
 
         try {
+            orderService.updateStatusAndHandleStock(id, status);
+            redirectAttributes.addFlashAttribute("success",
+                    "Cập nhật trạng thái đơn #" + id + " thành công!");
 
-            Order order = orderRepository.findById(id).orElse(null);
-
-            if (order != null) {
-
-                order.setStatus(status);
-
-
-                orderRepository.save(order);
-
-                System.out.println("Đã cập nhật đơn hàng #" + id + " sang trạng thái: " + status);
-                redirectAttributes.addFlashAttribute("success", "Cập nhật trạng thái thành công!");
-            } else {
-                redirectAttributes.addFlashAttribute("error", "Không tìm thấy đơn hàng!");
-            }
         } catch (Exception e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error",
+                    "Lỗi khi cập nhật trạng thái: " + e.getMessage());
         }
 
         return "redirect:/admin/orders";
     }
+
+
     @GetMapping("/orders/{id}")
     public String viewOrderDetail(@PathVariable Long id, HttpSession session, Model model) {
-
-        if (!isAdmin(session)) return "redirect:/login";
+        if (!isAdmin(session)) {
+            return "redirect:/login";
+        }
 
         Order order = orderService.getOrderById(id);
-        List<OrderLog> logs = orderLogService.getLogs(order.getId());
-
         model.addAttribute("order", order);
-        model.addAttribute("logs", logs);
+        model.addAttribute("username", session.getAttribute("username"));
 
         return "admin/order-detail";
     }
-
 
     @GetMapping("/products")
     public String manageProducts(HttpSession session, Model model) {
@@ -440,19 +421,19 @@ public class AdminController {
     }
 
 
-// 1. DUYỆT YÊU CẦU HỦY (GỌI SERVICE)
-        @PostMapping("/orders/{id}/approve-cancel")
-        public String approveCancelOrder(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
-            if (!isAdmin(session)) return "redirect:/login";
 
-            try {
-                orderService.approveCancel(id); // <--- Gọi Service
-                redirectAttributes.addFlashAttribute("success", "Đã duyệt hủy đơn hàng #" + id);
-            } catch (Exception e) {
-                redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
-            }
-            return "redirect:/admin/orders";
+    @PostMapping("/orders/{id}/approve-cancel")
+    public String approveCancelOrder(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!isAdmin(session)) return "redirect:/login";
+
+        try {
+            orderService.approveCancel(id); // <--- Gọi Service
+            redirectAttributes.addFlashAttribute("success", "Đã duyệt hủy đơn hàng #" + id);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }
+        return "redirect:/admin/orders";
+    }
 
     // 2. TỪ CHỐI YÊU CẦU HỦY (GỌI SERVICE)
     @PostMapping("/orders/{id}/reject-cancel")
@@ -467,8 +448,6 @@ public class AdminController {
         }
         return "redirect:/admin/orders";
     }
-
-
 
 
 

@@ -24,7 +24,7 @@ public class UserCoupon {
     private LocalDateTime usedAt;
     
     @Column(name = "order_id")
-    private Long orderId; // Đơn hàng đã dùng mã này
+    private Long orderId;
     
     @PrePersist
     protected void onCreate() {
