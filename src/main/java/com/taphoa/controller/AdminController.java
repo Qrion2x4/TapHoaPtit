@@ -225,7 +225,7 @@ public class AdminController {
 
         model.addAttribute("orders", orders);
         model.addAttribute("keyword", keyword);
-        model.addAttribute("status", status); // Trả về list để frontend tick lại các ô đã chọn
+        model.addAttribute("status", status);
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
 
@@ -250,7 +250,6 @@ public class AdminController {
 
         return "redirect:/admin/orders";
     }
-
 
     @GetMapping("/orders/{id}")
     public String viewOrderDetail(@PathVariable Long id, HttpSession session, Model model) {
@@ -294,11 +293,10 @@ public class AdminController {
     public String addProduct(@RequestParam String name,
                              @RequestParam String category,
                              @RequestParam Double price,
-                             @RequestParam(required = false) Double oldPrice,
+                             @RequestParam Double oldPrice,
                              @RequestParam("imageFile") MultipartFile imageFile,
                              @RequestParam Integer stock,
                              @RequestParam(required = false) String description,
-                             @RequestParam(required = false, defaultValue = "false") Boolean featured,
                              HttpSession session,
                              RedirectAttributes redirectAttributes) {
         if (!isAdmin(session)) {
@@ -306,10 +304,13 @@ public class AdminController {
         }
 
         try {
+            // Tính giá bán = giá gốc - (giá gốc * giảm giá %)
+            double finalPrice = price - (price * oldPrice / 100);
+
             Product product = new Product();
             product.setName(name);
             product.setCategory(category);
-            product.setPrice(price);
+            product.setPrice(finalPrice);
             product.setOldPrice(oldPrice);
 
             String fileName = saveImage(imageFile);
@@ -321,7 +322,7 @@ public class AdminController {
 
             product.setStock(stock);
             product.setDescription(description);
-            product.setFeatured(featured);
+            product.setFeatured(false);
 
             productService.saveProduct(product);
             redirectAttributes.addFlashAttribute("success", "Thêm sản phẩm thành công!");
@@ -355,12 +356,11 @@ public class AdminController {
                                 @RequestParam String name,
                                 @RequestParam String category,
                                 @RequestParam Double price,
-                                @RequestParam(required = false) Double oldPrice,
+                                @RequestParam Double oldPrice,
                                 @RequestParam("imageFile") MultipartFile imageFile,
                                 @RequestParam("imageUrl") String oldImageUrl,
                                 @RequestParam Integer stock,
                                 @RequestParam(required = false) String description,
-                                @RequestParam(required = false, defaultValue = "false") Boolean featured,
                                 HttpSession session,
                                 RedirectAttributes redirectAttributes) {
         if (!isAdmin(session)) {
@@ -374,9 +374,12 @@ public class AdminController {
                 return "redirect:/admin/products";
             }
 
+            // Tính giá bán = giá gốc - (giá gốc * giảm giá %)
+            double finalPrice = price - (price * oldPrice / 100);
+
             product.setName(name);
             product.setCategory(category);
-            product.setPrice(price);
+            product.setPrice(finalPrice);
             product.setOldPrice(oldPrice);
 
             if (!imageFile.isEmpty()) {
@@ -390,7 +393,7 @@ public class AdminController {
 
             product.setStock(stock);
             product.setDescription(description);
-            product.setFeatured(featured);
+            product.setFeatured(false);
 
             productService.saveProduct(product);
             redirectAttributes.addFlashAttribute("success", "Cập nhật sản phẩm thành công!");
@@ -420,14 +423,12 @@ public class AdminController {
         return "redirect:/admin/products";
     }
 
-
-
     @PostMapping("/orders/{id}/approve-cancel")
     public String approveCancelOrder(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
         if (!isAdmin(session)) return "redirect:/login";
 
         try {
-            orderService.approveCancel(id); // <--- Gọi Service
+            orderService.approveCancel(id);
             redirectAttributes.addFlashAttribute("success", "Đã duyệt hủy đơn hàng #" + id);
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
@@ -435,20 +436,16 @@ public class AdminController {
         return "redirect:/admin/orders";
     }
 
-    // 2. TỪ CHỐI YÊU CẦU HỦY (GỌI SERVICE)
     @PostMapping("/orders/{id}/reject-cancel")
     public String rejectCancelOrder(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
         if (!isAdmin(session)) return "redirect:/login";
 
         try {
-            orderService.rejectCancel(id); // <--- Gọi Service
+            orderService.rejectCancel(id);
             redirectAttributes.addFlashAttribute("success", "Đã từ chối yêu cầu hủy đơn #" + id);
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }
         return "redirect:/admin/orders";
     }
-
-
-
 }
