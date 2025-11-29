@@ -108,6 +108,105 @@
             border: 1px solid #e2e8f0; border-radius: 8px; color: #718096; text-decoration: none; background: #fff;
         }
         .btn-reset:hover { background: #edf2f7; color: #333; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; /* QUAN TRỌNG: Giúp chia cột đều, không bị vỡ khi nội dung dài */
+        }
+
+        /* Đảm bảo nội dung không bị tràn ra ngoài ô */
+        td {
+            padding: 15px;
+            text-align: left;
+            vertical-align: top; /* Căn tất cả nội dung lên trên */
+            border-bottom: 1px solid #eee;
+            word-wrap: break-word; /* Tự động xuống dòng nếu chữ quá dài */
+        }
+        .action-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            max-width: 170px;
+            word-break: break-word;
+        }
+
+        .status-form {
+            display: flex;
+            gap: 5px;
+            width: 100%;
+        }
+
+        .status-select {
+            width: 100%;
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 11px;
+        }
+
+        .btn-save,
+        .btn-approve,
+        .btn-reject {
+            width: 100%;
+            padding: 6px;
+            font-size: 11px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-save { background: #667eea; color: #fff; }
+        .btn-approve { background: #27ae60; color: #fff; }
+        .btn-reject { background: #e74c3c; color: #fff; }
+
+        .cancelled-box {
+            background: #f8d7da;
+            color: #842029;
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+            border: 1px solid #f5c6cb;
+            font-weight: bold;
+            writing-mode: horizontal-tb !important;
+        }
+
+        .completed-box {
+            background: #d1e7dd;
+            color: #0f5132;
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+            border: 1px solid #badbcc;
+            font-weight: bold;
+        }
+
+        .cancel-request-box {
+            background: #fff3cd;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ffeeba;
+            font-size: 12px;
+            font-weight: bold;
+            color: #856404;
+        }
+
+        .note-box {
+            background: #fff3cd;
+            color: #856404;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ffeeba;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .money {
+            font-weight: bold;
+            color: #2ecc71;
+        }
+
     </style>
 </head>
 <body>
@@ -197,87 +296,114 @@
         <table>
             <thead>
             <tr>
-                <th style="width: 50px;">ID</th>
-                <th style="width: 200px;">Khách Hàng</th>
-                <th>Sản Phẩm</th>
-                <th style="width: 100px;">Tổng Tiền</th>
-                <th style="width: 100px;">Trạng Thái</th>
-                <th style="width: 200px;">Thao Tác</th>
+                <th style="width: 5%;">ID</th>
+                <th style="width: 15%;">Khách Hàng</th>
+                <th style="width: 25%;">Sản Phẩm</th>
+                <th style="width: 15%;">Ghi Chú</th>
+                <th style="width: 10%;">Tổng Tiền</th>
+                <th style="width: 12%;">Trạng Thái</th>
+                <th style="width: 18%;">Thao Tác</th>
             </tr>
             </thead>
+
             <tbody>
             <tr th:each="order : ${orders}">
-                <td><strong th:text="'#' + ${order.id}" style="color: #667eea;">#1</strong></td>
+                <td><strong th:text="'#' + ${order.id}" style="color: #667eea;"></strong></td>
+
+                <!-- KHÁCH HÀNG -->
                 <td>
                     <div class="customer-info">
-                        <div class="customer-name" th:text="${order.user.username}">Nguyễn Văn A</div>
-                        <div class="customer-phone" th:text="${order.phone}">0912345678</div>
-                        <div class="customer-address" th:text="${order.address}">Hà Nội</div>
+                        <div class="customer-name" th:text="${order.user.username}"></div>
+                        <div class="customer-phone" th:text="${order.phone}"></div>
+                        <div class="customer-address" th:text="${order.address}"></div>
                     </div>
                 </td>
+
+                <!-- SẢN PHẨM -->
                 <td>
                     <div class="product-list">
                         <div th:each="item : ${order.orderItems}" class="product-item">
                             <img th:if="${item.product.imageUrl != null and item.product.imageUrl.contains('.')}"
                                  th:src="@{'/images/' + ${item.product.imageUrl}}" class="product-img">
+
                             <span th:unless="${item.product.imageUrl != null and item.product.imageUrl.contains('.')}"
-                                  th:text="${item.product.imageUrl}" style="font-size: 20px;">📦</span>
+                                  th:text="${item.product.imageUrl}" style="font-size: 20px;"></span>
+
                             <div class="product-info">
-                                <div class="product-name" th:text="${item.product.name}">Gạo ST25</div>
-                                <div class="product-qty">x <span th:text="${item.quantity}">1</span></div>
+                                <div class="product-name" th:text="${item.product.name}"></div>
+                                <div class="product-qty">x <span th:text="${item.quantity}"></span></div>
                             </div>
                         </div>
                     </div>
                 </td>
-                <td style="font-weight: bold; color: #2ecc71;"
-                    th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'">
-                    500,000₫
-                </td>
+
+                <!-- GHI CHÚ -->
                 <td>
-                   <span class="status-badge"
-                         th:classappend="${order.status == 'PENDING' ? 'status-pending' :
-                       order.status == 'CONFIRMED' ? 'status-confirmed' :
-                       order.status == 'SHIPPING' ? 'status-shipping' :
-                       order.status == 'COMPLETED' ? 'status-completed' :
-                       order.status == 'CANCEL_REQUESTED' ? 'status-pending' : 'status-cancelled'}"
-                         th:text="${order.status == 'PENDING' ? 'Chờ xử lý' :
-               order.status == 'CONFIRMED' ? 'Đã xác nhận' :
-               order.status == 'SHIPPING' ? 'Đang giao' :
-               order.status == 'COMPLETED' ? 'Hoàn thành' :
-               order.status == 'CANCEL_REQUESTED' ? 'Chờ xử lý hủy' : 'Đã hủy'}">
-                    </span>
+                    <div th:if="${order.note != null and order.note != ''}" class="note-box">
+                        <i class="fas fa-sticky-note"></i>
+                        <span th:text="${order.note}"></span>
+                    </div>
+                    <div th:unless="${order.note != null and order.note != ''}" style="color: #ccc; font-style: italic;">
+                        -
+                    </div>
+                </td>
+
+                <!-- TỔNG TIỀN -->
+                <td class="money" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                </td>
+
+                <!-- TRẠNG THÁI -->
+                <td>
+                <span class="status-badge"
+                      th:classappend="${order.status == 'PENDING' ? 'status-pending' :
+                           order.status == 'CONFIRMED' ? 'status-confirmed' :
+                           order.status == 'SHIPPING' ? 'status-shipping' :
+                           order.status == 'COMPLETED' ? 'status-completed' :
+                           order.status == 'CANCEL_REQUESTED' ? 'status-pending' : 'status-cancelled'}"
+                      th:text="${order.status == 'PENDING' ? 'Chờ xử lý' :
+                           order.status == 'CONFIRMED' ? 'Đã xác nhận' :
+                           order.status == 'SHIPPING' ? 'Đang giao' :
+                           order.status == 'COMPLETED' ? 'Hoàn thành' :
+                           order.status == 'CANCEL_REQUESTED' ? 'Chờ xử lý hủy' : 'Đã hủy'}">
+                </span>
                     <div style="font-size: 11px; color: #999; margin-top: 5px;"
                          th:text="${#temporals.format(order.createdAt, 'HH:mm dd/MM')}"></div>
                 </td>
+
+                <!-- THAO TÁC -->
                 <td>
                     <div class="action-group">
 
-                        <div th:if="${order.status == 'CANCEL_REQUESTED'}" style="display: flex; gap: 5px; flex-direction: column;">
-                            <div style="font-size: 11px; color: #d35400; font-weight: bold; margin-bottom: 3px;">
-                                ⚠️ Khách muốn hủy!
-                            </div>
-
-                            <div style="background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 8px; border-radius: 4px; font-size: 11px; margin-bottom: 5px; line-height: 1.4;">
-                                <i class="fas fa-comment-dots"></i>
-                                <span th:text="${order.note != null ? order.note : 'Không có lý do'}"></span>
-                            </div>
+                        <!-- KHÁCH YÊU CẦU HỦY -->
+                        <div th:if="${order.status == 'CANCEL_REQUESTED'}" class="cancel-request-box">
+                            ⚠️ Khách muốn hủy!
                             <form th:action="@{/admin/orders/{id}/approve-cancel(id=${order.id})}" method="post">
-                                <button type="submit" class="btn-save" style="background: #27ae60; width: 100%; border: none;"
-                                        onclick="return confirm('Chấp nhận hủy đơn hàng này?')">
-                                    ✓ Duyệt hủy
-                                </button>
+                                <button type="submit" class="btn-approve"
+                                        onclick="return confirm('Chấp nhận hủy đơn này?')">✓ Duyệt hủy</button>
                             </form>
 
                             <form th:action="@{/admin/orders/{id}/reject-cancel(id=${order.id})}" method="post">
-                                <button type="submit" class="btn-save" style="background: #e74c3c; width: 100%; border: none;"
-                                        onclick="return confirm('Từ chối yêu cầu hủy và tiếp tục đơn hàng?')">
-                                    ✕ Từ chối
-                                </button>
+                                <button type="submit" class="btn-reject"
+                                        onclick="return confirm('Từ chối yêu cầu hủy?')">✕ Từ chối</button>
                             </form>
                         </div>
 
-                        <form th:unless="${order.status == 'CANCEL_REQUESTED'}"
-                              th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="status-form">
+                        <!-- ĐƠN ĐÃ HỦY -->
+                        <div th:if="${order.status == 'CANCELLED'}" class="cancelled-box">
+                            ❌ Đơn đã hủy
+                        </div>
+
+                        <!-- ĐƠN HOÀN THÀNH -->
+                        <div th:if="${order.status == 'COMPLETED'}" class="completed-box">
+                            ✅ Hoàn thành
+                        </div>
+
+                        <!-- FORM ĐỔI TRẠNG THÁI -->
+                        <form th:if="${order.status != 'CANCEL_REQUESTED'
+                           and order.status != 'CANCELLED'
+                           and order.status != 'COMPLETED'}"
+                              th:action="@{/admin/orders/{id}/status(id=${order.id})}"
+                              method="post" class="status-form">
                             <select name="status" class="status-select">
                                 <option value="PENDING" th:selected="${order.status == 'PENDING'}">Chờ xử lý</option>
                                 <option value="CONFIRMED" th:selected="${order.status == 'CONFIRMED'}">Đã xác nhận</option>
@@ -287,12 +413,14 @@
                             </select>
                             <button type="submit" class="btn-save">Lưu</button>
                         </form>
+
                     </div>
                 </td>
             </tr>
             </tbody>
         </table>
     </div>
+
 </div>
 
 <script>
