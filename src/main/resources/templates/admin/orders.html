@@ -260,15 +260,19 @@
                                 ⚠️ Khách muốn hủy!
                             </div>
 
+                            <div style="background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 8px; border-radius: 4px; font-size: 11px; margin-bottom: 5px; line-height: 1.4;">
+                                <i class="fas fa-comment-dots"></i>
+                                <span th:text="${order.note != null ? order.note : 'Không có lý do'}"></span>
+                            </div>
                             <form th:action="@{/admin/orders/{id}/approve-cancel(id=${order.id})}" method="post">
-                                <button type="submit" class="btn-save" style="background: #27ae60; width: 100%;"
+                                <button type="submit" class="btn-save" style="background: #27ae60; width: 100%; border: none;"
                                         onclick="return confirm('Chấp nhận hủy đơn hàng này?')">
                                     ✓ Duyệt hủy
                                 </button>
                             </form>
 
                             <form th:action="@{/admin/orders/{id}/reject-cancel(id=${order.id})}" method="post">
-                                <button type="submit" class="btn-save" style="background: #e74c3c; width: 100%;"
+                                <button type="submit" class="btn-save" style="background: #e74c3c; width: 100%; border: none;"
                                         onclick="return confirm('Từ chối yêu cầu hủy và tiếp tục đơn hàng?')">
                                     ✕ Từ chối
                                 </button>
