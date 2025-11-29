@@ -221,6 +221,22 @@
                         <!-- NAME -->
                         <div class="item-details">
                             <div class="item-name" th:text="${item.product.name}">Tên sản phẩm</div>
+                            <!-- HIỂN THỊ GIÁ -->
+                            <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+                                <!-- GIÁ BÁN (XANH, ĐẬM) -->
+                                <span style="font-weight: bold; color: #667eea; font-size: 15px;" 
+                                      th:text="${#numbers.formatDecimal(item.product.price, 0, 'COMMA', 0, 'POINT')} + 'đ'">50,000đ</span>
+                                
+                                <!-- GIÁ GỐC GẠCH NGANG + BADGE % -->
+                                <div th:if="${item.product.oldPrice != null && item.product.oldPrice > 0}">
+                                    <span style="text-decoration: line-through; color: #999; font-size: 12px;">
+                                        <span th:text="${#numbers.formatDecimal(item.product.price / (1 - item.product.oldPrice / 100), 0, 'COMMA', 0, 'POINT')}">100,000</span>đ
+                                    </span>
+                                    <span style="margin-left: 8px; background: #feebc8; padding: 2px 8px; border-radius: 3px; color: #7c2d12; font-weight: 600; font-size: 11px;">
+                                        -<span th:text="${item.product.oldPrice}">50</span>%
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                         
                         <!-- TOTAL -->
@@ -281,7 +297,7 @@
                 
                 <div class="coupon-section">
                     <input type="text" 
-                           placeholder="Nhập mã giảm giá (VD: NEWBIE)" 
+                           placeholder="Nhập mã giảm giá" 
                            id="coupon-input"
                            style="text-transform: uppercase;">
                     <button class="apply-coupon-btn" onclick="applyCoupon()">Áp dụng</button>

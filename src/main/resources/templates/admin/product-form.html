@@ -9,7 +9,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
 
-
         .admin-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white; padding: 20px 40px; display: flex;
@@ -23,7 +22,6 @@
             border-radius: 5px; transition: background 0.3s;
         }
         .admin-nav a:hover, .admin-nav a.active { background: rgba(255,255,255,0.2); }
-
 
         .container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
         .form-card {
@@ -41,7 +39,6 @@
             border-radius: 5px; font-size: 14px;
         }
 
-        /* CSS cho phần Upload Ảnh */
         .image-preview-box {
             margin-bottom: 15px;
             border: 1px dashed #ccc;
@@ -57,6 +54,40 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
+        .price-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .price-preview {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+            margin-top: 15px;
+        }
+
+        .price-preview h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .price-preview-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        .price-preview-breakdown {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #ddd;
+        }
+
         .form-actions { display: flex; gap: 15px; margin-top: 30px; }
         .btn {
             padding: 12px 30px; border-radius: 5px; text-decoration: none;
@@ -64,8 +95,6 @@
         }
         .btn-primary { background: #667eea; color: white; }
         .btn-secondary { background: #e2e8f0; color: #333; }
-        .checkbox-group { display: flex; align-items: center; gap: 10px; }
-        .checkbox-group input[type="checkbox"] { width: 20px; height: 20px; }
     </style>
 </head>
 <body>
@@ -123,15 +152,30 @@
                 <div style="font-size: 12px; color: #666; margin-top: 5px;">Hỗ trợ: .jpg, .png, .jpeg</div>
             </div>
 
-            <div class="form-group">
-                <label for="price">Giá Bán (₫) *</label>
-                <input type="number" id="price" name="price" th:value="${product.price}" required min="0">
+            <div class="price-section">
+                <div class="form-group">
+                    <label for="basePrice">Giá Gốc (₫) *</label>
+                    <input type="number" id="basePrice" name="price" 
+                           th:value="${product.price}" required min="0" step="1000"
+                           onchange="calculateDiscount()" oninput="calculateDiscount()"
+                           placeholder="100000">
+                </div>
+
+                <div class="form-group">
+                    <label for="discount">Giảm Giá (%) *</label>
+                    <input type="number" id="discount" name="oldPrice" 
+                           th:value="${product.oldPrice}" required min="0" max="100" step="1"
+                           onchange="calculateDiscount()" oninput="calculateDiscount()"
+                           placeholder="0">
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="oldPrice">Giá Cũ (₫) - Để trống nếu không giảm giá</label>
-                <input type="number" id="oldPrice" name="oldPrice" th:value="${product.oldPrice}"
-                       min="0" step="1000" placeholder="135000">
+            <div class="price-preview">
+                <h4>💰 Giá Bán Sau Giảm Giá</h4>
+                <div class="price-preview-value" id="finalPrice">0 ₫</div>
+                <div class="price-preview-breakdown">
+                    <span id="breakdown"></span>
+                </div>
             </div>
 
             <div class="form-group">
@@ -145,12 +189,8 @@
                           placeholder="Mô tả chi tiết về sản phẩm..." th:text="${product.description}"></textarea>
             </div>
 
-            <div class="form-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="featured" name="featured" value="true" th:checked="${product.featured}">
-                    <label for="featured">Sản phẩm nổi bật</label>
-                </div>
-            </div>
+            <!-- Ẩn input featured (luôn false) -->
+            <input type="hidden" name="featured" value="false">
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">💾 Lưu Lại</button>
@@ -168,7 +208,6 @@
         if (input.files && input.files[0]) {
             var reader = new FileReader();
             reader.onload = function(e) {
-                // Nếu thẻ img preview chưa có (trường hợp thêm mới), tạo hiển thị cho nó
                 if (preview) {
                     preview.src = e.target.result;
                     preview.style.display = 'inline-block';
@@ -179,6 +218,33 @@
             reader.readAsDataURL(input.files[0]);
         }
     }
+
+    function calculateDiscount() {
+        const basePrice = parseFloat(document.getElementById('basePrice').value) || 0;
+        const discountPercent = parseFloat(document.getElementById('discount').value) || 0;
+        
+        if (basePrice <= 0 || discountPercent < 0 || discountPercent > 100) {
+            document.getElementById('finalPrice').textContent = '0 ₫';
+            document.getElementById('breakdown').textContent = 'Nhập giá và % giảm giá hợp lệ';
+            return;
+        }
+
+        const discountAmount = basePrice * (discountPercent / 100);
+        const finalPrice = basePrice - discountAmount;
+
+        document.getElementById('finalPrice').textContent = formatCurrency(finalPrice) + ' ₫';
+        document.getElementById('breakdown').innerHTML = 
+            `Giá gốc: <strong>${formatCurrency(basePrice)} ₫</strong><br>` +
+            `Giảm: <strong>${discountPercent}%</strong> (${formatCurrency(discountAmount)} ₫)<br>` +
+            `Giá bán: <strong>${formatCurrency(finalPrice)} ₫</strong>`;
+    }
+
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('vi-VN').format(Math.round(value));
+    }
+
+    // Tính toán lúc tải trang
+    document.addEventListener('DOMContentLoaded', calculateDiscount);
 </script>
 </body>
 </html>
