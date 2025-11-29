@@ -44,4 +44,8 @@ public class ProductService {
         System.out.println("Deleting product ID: " + id);
         productRepository.deleteById(id);
     }
+
+    public List<Product> getDiscountedProducts() {
+        return productRepository.findDiscountedProducts();
+    }
 }

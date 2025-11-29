@@ -154,21 +154,52 @@
 
             <div class="price-section">
                 <div class="form-group">
-                    <label for="basePrice">Giá Gốc (₫) *</label>
-                    <input type="number" id="basePrice" name="price" 
-                           th:value="${product.price}" required min="0" step="1000"
-                           onchange="calculateDiscount()" oninput="calculateDiscount()"
-                           placeholder="100000">
+                    <label for="oldPrice">Giá Gốc / Giá Niêm Yết (₫)</label>
+                    <input type="number" id="oldPrice" name="oldPrice"
+                           th:value="${product.oldPrice}" min="0" step="1000"
+                           oninput="calculatePercent()"
+                           placeholder="Ví dụ: 135000">
                 </div>
 
                 <div class="form-group">
-                    <label for="discount">Giảm Giá (%) *</label>
-                    <input type="number" id="discount" name="oldPrice" 
-                           th:value="${product.oldPrice}" required min="0" max="100" step="1"
-                           onchange="calculateDiscount()" oninput="calculateDiscount()"
-                           placeholder="0">
+                    <label for="price">Giá Bán Thực Tế (₫) *</label>
+                    <input type="number" id="price" name="price"
+                           th:value="${product.price}" required min="0" step="1000"
+                           oninput="calculatePercent()"
+                           placeholder="Ví dụ: 120000">
                 </div>
             </div>
+
+            <div class="price-preview">
+                <h4>🔥 Xem trước giảm giá</h4>
+                <div class="price-preview-value" id="percentPreview">0%</div>
+                <div class="price-preview-breakdown" id="profitPreview">
+                    Nhập giá gốc và giá bán để xem % giảm
+                </div>
+            </div>
+
+            <script>
+                function calculatePercent() {
+                    const oldPrice = parseFloat(document.getElementById('oldPrice').value) || 0;
+                    const price = parseFloat(document.getElementById('price').value) || 0;
+
+                    if (oldPrice > 0 && price > 0) {
+                        if (price >= oldPrice) {
+                            document.getElementById('percentPreview').textContent = "Không giảm";
+                            document.getElementById('percentPreview').style.color = "#666";
+                            document.getElementById('profitPreview').textContent = "Giá bán đang cao hơn hoặc bằng giá gốc";
+                        } else {
+                            const percent = Math.round(((oldPrice - price) / oldPrice) * 100);
+                            document.getElementById('percentPreview').textContent = "-" + percent + "%";
+                            document.getElementById('percentPreview').style.color = "#e74c3c";
+                            document.getElementById('profitPreview').textContent =
+                                `Khách tiết kiệm được: ${new Intl.NumberFormat('vi-VN').format(oldPrice - price)} ₫`;
+                        }
+                    }
+                }
+                // Chạy khi load trang
+                document.addEventListener('DOMContentLoaded', calculatePercent);
+            </script>
 
             <div class="price-preview">
                 <h4>💰 Giá Bán Sau Giảm Giá</h4>

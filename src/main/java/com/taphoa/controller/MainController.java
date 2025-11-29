@@ -29,9 +29,7 @@ public class MainController {
     @Autowired
     private OrderService orderService;
     
-    // ============================================
-    // TRANG CHỦ
-    // ============================================
+
     @GetMapping("/")
     public String home(HttpSession session, Model model) {
         String username = (String) session.getAttribute("username");
@@ -54,6 +52,7 @@ public class MainController {
         
         List<Product> featuredProducts = productService.getFeaturedProducts();
         List<Product> allProducts = productService.getAllProducts();
+        List<Product> featured = productService.getDiscountedProducts();
         
         model.addAttribute("featuredProducts", featuredProducts);
         model.addAttribute("allProducts", allProducts);
@@ -61,9 +60,7 @@ public class MainController {
         return "index";
     }
     
-    // ============================================
-    // ĐĂNG NHẬP
-    // ============================================
+
     @GetMapping("/login")
     public String loginPage(HttpSession session) {
         if (session.getAttribute("userId") != null) {
@@ -102,9 +99,7 @@ public class MainController {
         }
     }
     
-    // ============================================
-    // ĐĂNG KÝ
-    // ============================================
+
     @GetMapping("/register")
     public String registerPage(HttpSession session) {
         if (session.getAttribute("userId") != null) {
@@ -139,10 +134,7 @@ public class MainController {
             return "register";
         }
     }
-    
-    // ============================================
-    // XÁC THỰC EMAIL
-    // ============================================
+
     @GetMapping("/verify-email")
     public String verifyEmail(@RequestParam String token, Model model) {
         try {
