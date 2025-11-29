@@ -14,7 +14,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// ==================== AJAX ADD TO CART - MỚI (JSON API) ==================== 
+// ==================== AJAX ADD TO CART (JSON API) ==================== 
 document.querySelectorAll('.add-to-cart-form').forEach(form => {
     form.addEventListener('submit', function(e) {
         e.preventDefault(); // Chặn submit form bình thường
@@ -31,7 +31,7 @@ document.querySelectorAll('.add-to-cart-form').forEach(form => {
         btn.disabled = true;
         btn.style.opacity = '0.7';
         
-        // ✅ GỌI API JSON
+        // GỌI API JSON
         fetch('/api/cart/add', {
             method: 'POST',
             headers: {
@@ -44,7 +44,7 @@ document.querySelectorAll('.add-to-cart-form').forEach(form => {
             console.log('Response:', data);
             
             if (data.success) {
-                // ✅ Cập nhật badge với số mới từ server
+                // Cập nhật badge với số mới từ server
                 const currentCartBadge = document.querySelector('.cart-badge');
                 const cartLink = document.querySelector('.cart-link');
                 

@@ -26,7 +26,7 @@ public class OrderService {
     private ProductRepository productRepository;
 
     /**
-     *  TẠO ĐƠN HÀNG CHỈ VỚI CÁC SẢN PHẨM ĐÃ CHỌN + COUPON (API MỚI)
+     *  TẠO ĐƠN HÀNG CHỈ VỚI CÁC SẢN PHẨM ĐÃ CHỌN + COUPON
      */
     @Transactional
     public Order createOrderFromSelectedItems(User user,
@@ -185,7 +185,7 @@ public class OrderService {
             throw new Exception("Không tìm thấy đơn hàng!");
         }
 
-        // 2. Xử lý logic ghép chuỗi lý do (Giống hệt bên Controller cũ)
+        // 2. Xử lý logic ghép chuỗi lý do 
         String fullReason = "Khách hủy: " + (reason != null ? reason : "Lý do khác");
 
         // Nếu có ghi chú thêm thì nối vào
@@ -193,7 +193,7 @@ public class OrderService {
             fullReason += " (" + note + ")";
         }
 
-        // 3. Cập nhật vào Ghi chú đơn hàng (giữ lại ghi chú cũ nếu có)
+        // 3. Cập nhật vào Ghi chú đơn hàng 
         String oldNote = order.getNote() != null ? order.getNote() : "";
         String newNote = oldNote.isEmpty() ? fullReason : oldNote + " | " + fullReason;
         order.setNote(newNote);
@@ -216,9 +216,6 @@ public class OrderService {
             order.setStatus("CANCELLED");
             orderRepository.save(order);
 
-            // (Tùy chọn) Nếu bạn có logic hoàn kho (cộng lại kho), hãy viết ở đây
-            // restoreStock(order);
-
             System.out.println("✅ Admin approved cancel for order #" + orderId);
         }
     }
@@ -233,14 +230,13 @@ public class OrderService {
             // 1. Khôi phục về trạng thái Đã xác nhận (để tiếp tục giao hàng)
             order.setStatus("CONFIRMED");
 
-            // 2. --- LOGIC MỚI: CẬP NHẬT GHI CHÚ ---
+            // 2. CẬP NHẬT GHI CHÚ 
             String oldNote = order.getNote() != null ? order.getNote() : "";
-            String rejectMessage = "Shop đã từ chối yêu cầu hủy đơn"; // Nội dung bạn muốn ghi
+            String rejectMessage = "Shop đã từ chối yêu cầu hủy đơn";
 
             // Nối ghi chú mới vào sau ghi chú cũ
             String newNote = oldNote.isEmpty() ? rejectMessage : oldNote + " | " + rejectMessage;
             order.setNote(newNote);
-            // -------------------------------------
 
             // 3. Lưu xuống Database
             orderRepository.save(order);

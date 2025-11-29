@@ -94,7 +94,7 @@ public class CouponService {
     }
     
     /**
-     * ✅ THÊM METHOD MỚI: Lấy coupon theo code
+     * Lấy coupon theo code
      */
     public Coupon getCouponByCode(String code) {
         if (code == null || code.trim().isEmpty()) {

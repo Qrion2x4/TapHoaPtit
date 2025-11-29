@@ -341,7 +341,7 @@
             <form id="orderForm" action="/order/place-selected" method="post">
                 <input type="hidden" id="selectedItemIds" name="selectedItemIds">
                 
-                <!-- ✅ THÊM 2 HIDDEN INPUT MỚI CHO COUPON -->
+                <!-- HIDDEN INPUT -->
                 <input type="hidden" id="appliedCouponCode" name="couponCode">
                 <input type="hidden" id="appliedDiscountAmount" name="discountAmount">
                 
@@ -407,7 +407,7 @@
         // ==================== COUPON LOGIC ====================
         
         let appliedDiscount = 0;
-        let appliedCouponCode = ''; // ✅ THÊM BIẾN LƯU MÃ COUPON
+        let appliedCouponCode = ''; // THÊM BIẾN LƯU MÃ COUPON
         
         function applyCoupon() {
             const couponInput = document.getElementById('coupon-input');
@@ -419,7 +419,7 @@
                 return;
             }
             
-            // ✅ LẤY TỔNG TIỀN CỦA CÁC SẢN PHẨM ĐÃ CHỌN
+            // LẤY TỔNG TIỀN CỦA CÁC SẢN PHẨM ĐÃ CHỌN
             const checkboxes = document.querySelectorAll('.item-checkbox:checked');
             if (checkboxes.length === 0) {
                 showToast('❌ Vui lòng chọn sản phẩm trước khi áp dụng mã!', 'error');
@@ -448,9 +448,9 @@
             .then(response => response.json())
             .then(data => {
                 if (data.valid) {
-                    // ✅ LƯU COUPON VÀ DISCOUNT
+                    // LƯU COUPON VÀ DISCOUNT
                     appliedDiscount = data.discount;
-                    appliedCouponCode = code; // ✅ LƯU MÃ COUPON
+                    appliedCouponCode = code; // LƯU MÃ COUPON
                     
                     // Hiển thị UI
                     resultDiv.innerHTML = `<span style="color: #27ae60;">✓ ${data.message}</span>`;
@@ -513,7 +513,7 @@
             document.getElementById('summarySelectedCount').textContent = selectedCount;
             document.getElementById('selectedTotal').textContent = formatMoney(totalSelected);
             
-            // ✅ TÍNH LẠI TỔNG TIỀN SAU KHI TRỪ GIẢM GIÁ
+            // TÍNH LẠI TỔNG TIỀN SAU KHI TRỪ GIẢM GIÁ
             const finalAmount = totalSelected - appliedDiscount;
             document.getElementById('finalTotal').textContent = formatMoney(finalAmount);
             
@@ -527,7 +527,7 @@
                 checkoutBtn.disabled = true;
                 document.getElementById('selectedInfo').textContent = 'Chưa chọn sản phẩm nào';
                 
-                // ✅ Reset coupon nếu bỏ chọn hết
+                // Reset coupon nếu bỏ chọn hết
                 if (appliedDiscount > 0) {
                     resetCoupon();
                 }
@@ -538,10 +538,10 @@
             selectAllCheckbox.checked = (selectedCount === totalCheckboxes && totalCheckboxes > 0);
         }
         
-        // ✅ HÀM RESET COUPON
+        // HÀM RESET COUPON
         function resetCoupon() {
             appliedDiscount = 0;
-            appliedCouponCode = ''; // ✅ XÓA MÃ
+            appliedCouponCode = ''; // XÓA MÃ
             document.getElementById('discount-row').style.display = 'none';
             document.getElementById('discountAmount').textContent = '0₫';
             
@@ -565,7 +565,7 @@
             updateSelectedItems();
         }
         
-        // ✅ SỬA HÀM openOrderModal - GỬI COUPON VÀO FORM
+        // SỬA HÀM openOrderModal - GỬI COUPON VÀO FORM
         function openOrderModal() {
             const checkboxes = document.querySelectorAll('.item-checkbox:checked');
             
@@ -577,7 +577,7 @@
             const selectedIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-item-id'));
             document.getElementById('selectedItemIds').value = selectedIds.join(',');
             
-            // ✅ GỬI COUPON VÀO HIDDEN FIELDS
+            // GỬI COUPON VÀO HIDDEN FIELDS
             document.getElementById('appliedCouponCode').value = appliedCouponCode;
             document.getElementById('appliedDiscountAmount').value = appliedDiscount;
             
@@ -589,7 +589,7 @@
                 totalSelected += price * quantity;
             });
             
-            // ✅ HIỂN THỊ TỔNG TIỀN SAU GIẢM GIÁ TRONG MODAL
+            // HIỂN THỊ TỔNG TIỀN SAU GIẢM GIÁ TRONG MODAL
             const finalTotal = totalSelected - appliedDiscount;
             
             document.getElementById('modalItemCount').textContent = selectedCount + ' sản phẩm';
@@ -624,7 +624,7 @@
                     return false;
                 }
                 
-                // ✅ VALIDATE SỐ ĐIỆN THOẠI
+                // VALIDATE SỐ ĐIỆN THOẠI
                 if (!validateVietnamesePhone(phone)) {
                     e.preventDefault();
                     alert('❌ Số điện thoại không hợp lệ!\n\nĐịnh dạng đúng:\n• 0xxxxxxxxx (10 số)\n• Bắt đầu bằng 03, 05, 07, 08, 09\n\nVí dụ: 0912345678');
@@ -713,7 +713,7 @@
                         checkbox.setAttribute('data-quantity', data.newQuantity);
                     }
                     
-                    // ✅ Enable nút trừ nếu quantity > 1
+                    // Enable nút trừ nếu quantity > 1
                     const decreaseBtn = document.querySelector(`.decrease-btn[data-item-id="${itemId}"]`);
                     if (decreaseBtn && data.newQuantity > 1) {
                         decreaseBtn.disabled = false;
@@ -742,7 +742,7 @@
             const itemId = button.getAttribute('data-item-id');
             const originalText = button.textContent;
             
-            // ✅ Kiểm tra xem có phải quantity = 1 không
+            // Kiểm tra xem có phải quantity = 1 không
             const quantitySpan = document.querySelector(`.quantity-display[data-item-id="${itemId}"]`);
             const currentQuantity = parseInt(quantitySpan.textContent);
             
@@ -767,7 +767,7 @@
                             cartItem.style.animation = 'slideOut 0.3s ease';
                             setTimeout(() => {
                                 cartItem.remove();
-                                updateTotalItemsCounter(); // ✅ Cập nhật counter
+                                updateTotalItemsCounter(); // Cập nhật counter
                                 checkEmptyCart();
                                 updateSelectedItems();
                             }, 300);
@@ -788,7 +788,7 @@
                             checkbox.setAttribute('data-quantity', data.newQuantity);
                         }
                         
-                        // ✅ Disable nút trừ nếu quantity = 1
+                        // Disable nút trừ nếu quantity = 1
                         if (data.newQuantity <= 1) {
                             button.disabled = true;
                         }
@@ -837,7 +837,7 @@
                         setTimeout(() => {
                             cartItem.remove();
                             
-                            // ✅ Cập nhật counter trước khi check empty
+                            // Cập nhật counter trước khi check empty
                             updateTotalItemsCounter();
                             checkEmptyCart();
                             updateSelectedItems();
@@ -885,12 +885,11 @@
                     window.location.reload();
                 }, 500);
             } else {
-                // ✅ Cập nhật counter "Chọn tất cả"
                 updateTotalItemsCounter();
             }
         }
         
-        // ✅ HÀM MỚI: Cập nhật tổng số sản phẩm
+        // Cập nhật tổng số sản phẩm
         function updateTotalItemsCounter() {
             const totalItems = document.querySelectorAll('.cart-item').length;
             const totalCounterSpan = document.querySelector('.select-all-section label');

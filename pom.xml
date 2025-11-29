@@ -33,7 +33,7 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
         
-        <!-- ✅ THÊM MỚI: Spring Mail để gửi email -->
+        <!-- Spring Mail để gửi email -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
@@ -50,7 +50,7 @@
             <optional>true</optional>
         </dependency>
         
-        <!-- ✅ THÊM MỚI: Validation -->
+        <!-- Validation -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>

@@ -150,7 +150,6 @@ public class OrderController {
 
             } else if ("CONFIRMED".equals(currentStatus)) {
                 // Đơn đã xác nhận -> Gọi Service để lưu lý do và chuyển trạng thái chờ duyệt
-                // Hàm này bạn vừa thêm vào OrderService ở bước trước
                 orderService.requestCancelOrder(orderId, reason, note);
 
                 redirectAttributes.addFlashAttribute("warning",

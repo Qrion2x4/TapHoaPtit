@@ -15,7 +15,6 @@ import java.util.Map;
 
 /**
  * REST API Controller cho giỏ hàng
- * Xử lý các request AJAX không reload trang
  */
 @RestController
 @RequestMapping("/api/cart")
@@ -31,8 +30,7 @@ public class CartRestController {
     private CouponService couponService;
     
     /**
-     * ✅ API MỚI: THÊM VÀO GIỎ HÀNG (AJAX)
-     * URL: POST /api/cart/add
+     * THÊM VÀO GIỎ HÀNG (AJAX)
      */
     @PostMapping("/add")
     public ResponseEntity<?> addToCartAjax(@RequestParam Long productId,
@@ -86,7 +84,6 @@ public class CartRestController {
     
     /**
      * Tăng số lượng sản phẩm
-     * URL: POST /api/cart/increase/{id}
      */
     @PostMapping("/increase/{id}")
     public ResponseEntity<?> increaseQuantity(@PathVariable Long id, HttpSession session) {
@@ -142,7 +139,6 @@ public class CartRestController {
     
     /**
      * Giảm số lượng sản phẩm
-     * URL: POST /api/cart/decrease/{id}
      */
     @PostMapping("/decrease/{id}")
     public ResponseEntity<?> decreaseQuantity(@PathVariable Long id, HttpSession session) {
@@ -167,7 +163,7 @@ public class CartRestController {
                 return ResponseEntity.status(403).body(createErrorResponse("Không có quyền!"));
             }
             
-            // ✅ NẾU quantity = 1, KHÔNG CHO GIẢM
+            // NẾU quantity = 1, KHÔNG CHO GIẢM
             if (item.getQuantity() <= 1) {
                 System.out.println("❌ Quantity is 1, cannot decrease. Use remove instead!");
                 return ResponseEntity.badRequest().body(
@@ -206,7 +202,6 @@ public class CartRestController {
     
     /**
      * Xóa sản phẩm khỏi giỏ
-     * URL: DELETE /api/cart/remove/{id}
      */
     @DeleteMapping("/remove/{id}")
     public ResponseEntity<?> removeItem(@PathVariable Long id, HttpSession session) {
@@ -257,8 +252,7 @@ public class CartRestController {
     }
     
     /**
-     * ✅ API MỚI: KIỂM TRA MÃ GIẢM GIÁ
-     * URL: POST /api/cart/apply-coupon
+     * KIỂM TRA MÃ GIẢM GIÁ
      */
     @PostMapping("/apply-coupon")
     public ResponseEntity<?> applyCoupon(@RequestParam String code,

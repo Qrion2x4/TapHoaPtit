@@ -78,55 +78,6 @@
         <div th:if="${success}" class="toast" style="position: relative; margin-bottom: 20px;">
             <span th:text="${success}"></span>
         </div>
-        
-        <!-- SẢN PHẨM NỔI BẬT -->
-<!--        <h2 class="section-title">🔥 Khuyến mãi</h2>-->
-<!--        <div class="product-grid">-->
-<!--            <div class="product-card" th:each="product : ${allProducts}"-->
-<!--                 th:if="${product.oldPrice != null and product.oldPrice > product.price}">-->
-
-<!--                <div style="position: absolute; top: 10px; left: 10px; background: linear-gradient(135deg, #ff4444, #ff6b6b); color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; z-index: 10; box-shadow: 0 2px 8px rgba(255,68,68,0.3);">-->
-<!--                    <span th:text="'-' + ${#numbers.formatInteger((1.0 - product.price / product.oldPrice) * 100, 0)} + '%'">-15%</span>-->
-<!--                </div>-->
-
-<!--                <div class="product-img">-->
-<!--                    <img th:if="${product.imageUrl != null and product.imageUrl.contains('.')}"-->
-<!--                         th:src="@{'/images/' + ${product.imageUrl}}"-->
-<!--                         alt="Sản phẩm"-->
-<!--                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">-->
-
-<!--                    <span th:unless="${product.imageUrl != null and product.imageUrl.contains('.')}"-->
-<!--                          th:text="${product.imageUrl}"-->
-<!--                          style="font-size: 80px; display: block; text-align: center; line-height: 1.5;">📦</span>-->
-<!--                </div>-->
-
-<!--                <div class="product-name" th:text="${product.name}">Tên sản phẩm</div>-->
-
-<!--                <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin: 10px 0; font-size: 13px; color: #666;">-->
-<!--            <span style="display: flex; align-items: center; gap: 3px;">-->
-<!--                ⭐ <strong>4.8</strong>-->
-<!--            </span>-->
-<!--                    <span>Đã bán <strong>1.2k</strong></span>-->
-<!--                </div>-->
-
-<!--                <div class="product-price">-->
-<!--                    <span th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</span>-->
-<!--                    <span class="old-price"-->
-<!--                          th:text="${#numbers.formatDecimal(product.oldPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'"></span>-->
-<!--                </div>-->
-
-<!--                <form th:if="${username != null}" action="/cart/add" method="post" class="add-to-cart-form">-->
-<!--                    <input type="hidden" name="productId" th:value="${product.id}">-->
-<!--                    <input type="hidden" name="quantity" value="1">-->
-<!--                    <input type="hidden" name="returnUrl" value="/">-->
-<!--                    <button type="submit" class="add-cart-btn">🛒 Thêm vào giỏ</button>-->
-<!--                </form>-->
-
-<!--                <a th:if="${username == null}" href="/login" class="add-cart-btn" style="text-decoration: none; display: flex; justify-content: center;">-->
-<!--                    🔑 Đăng nhập-->
-<!--                </a>-->
-<!--            </div>-->
-<!--        </div>-->
 
         <!-- TẤT CẢ SẢN PHẨM -->
         <h2 class="section-title">🛍 Tất cả sản phẩm</h2>
