@@ -30,7 +30,7 @@ public class DataInitializer implements CommandLineRunner {
         
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         
-        // ============ TÀI KHOẢN ADMIN ĐỂ TEST ============
+
         if (!userRepository.existsByUsername("admin")) {
             User admin = new User();
             admin.setUsername("admin");
@@ -50,13 +50,13 @@ public class DataInitializer implements CommandLineRunner {
         
         System.out.println("-------------------------------------------");
         
-        // ============ MÃ GIẢM GIÁ - NEWBIE ============
+
         couponService.createNewbieCoupon();
         System.out.println("✓ NEWBIE coupon ready (10% off, max 50k)");
         
         System.out.println("-------------------------------------------");
         
-        // ============ TẠO SẢN PHẨM MẪU ============
+
         if (productRepository.count() == 0) {
             System.out.println("📦 Creating sample products...");
             

@@ -105,9 +105,7 @@ public class CartController {
         return "redirect:/";
     }
     
-    /**
-     * TĂNG SỐ LƯỢNG
-     */
+
     @PostMapping("/increase/{id}")
     public String increaseQuantity(@PathVariable Long id, 
                                    RedirectAttributes redirectAttributes) {
@@ -134,9 +132,7 @@ public class CartController {
         return "redirect:/cart";
     }
     
-    /**
-     * GIẢM SỐ LƯỢNG
-     */
+
     @PostMapping("/decrease/{id}")
     public String decreaseQuantity(@PathVariable Long id,
                                    RedirectAttributes redirectAttributes) {

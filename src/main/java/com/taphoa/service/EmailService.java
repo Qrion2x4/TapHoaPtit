@@ -24,9 +24,7 @@ public class EmailService {
     @Value("${app.name}")
     private String appName;
     
-    /**
-     * Gửi email xác thực tài khoản
-     */
+
     public void sendVerificationEmail(String toEmail, String username, String token) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -81,9 +79,7 @@ public class EmailService {
         }
     }
     
-    /**
-     * Gửi email reset mật khẩu
-     */
+
     public void sendResetPasswordEmail(String toEmail, String username, String token) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -138,9 +134,7 @@ public class EmailService {
         }
     }
     
-    /**
-     * Gửi email thông báo đổi mật khẩu thành công
-     */
+
     public void sendPasswordChangedEmail(String toEmail, String username) {
         try {
             MimeMessage message = mailSender.createMimeMessage();

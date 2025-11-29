@@ -13,9 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * REST API Controller cho giỏ hàng
- */
+
 @RestController
 @RequestMapping("/api/cart")
 public class CartRestController {
@@ -29,9 +27,7 @@ public class CartRestController {
     @Autowired
     private CouponService couponService;
     
-    /**
-     * THÊM VÀO GIỎ HÀNG (AJAX)
-     */
+
     @PostMapping("/add")
     public ResponseEntity<?> addToCartAjax(@RequestParam Long productId,
                                            @RequestParam(defaultValue = "1") Integer quantity,
@@ -55,12 +51,12 @@ public class CartRestController {
             
             System.out.println("User: " + user.getUsername());
             
-            // Thêm vào giỏ
+
             cartService.addToCart(user, productId, quantity);
             
             System.out.println("✅ Added to cart successfully!");
             
-            // Lấy thông tin mới
+
             int newCartCount = cartService.getCartCount(user);
             Double newCartTotal = cartService.getCartTotal(user);
             
@@ -82,9 +78,7 @@ public class CartRestController {
         }
     }
     
-    /**
-     * Tăng số lượng sản phẩm
-     */
+
     @PostMapping("/increase/{id}")
     public ResponseEntity<?> increaseQuantity(@PathVariable Long id, HttpSession session) {
         try {
@@ -137,28 +131,26 @@ public class CartRestController {
         }
     }
     
-    /**
-     * Giảm số lượng sản phẩm
-     */
+
     @PostMapping("/decrease/{id}")
     public ResponseEntity<?> decreaseQuantity(@PathVariable Long id, HttpSession session) {
         try {
             System.out.println("=== API: DECREASE QUANTITY ===");
             System.out.println("Cart Item ID: " + id);
             
-            // Kiểm tra đăng nhập
+
             Long userId = (Long) session.getAttribute("userId");
             if (userId == null) {
                 return ResponseEntity.status(401).body(createErrorResponse("Vui lòng đăng nhập!"));
             }
             
-            // Lấy cart item
+
             CartItem item = cartService.getCartItemById(id);
             if (item == null) {
                 return ResponseEntity.badRequest().body(createErrorResponse("Không tìm thấy sản phẩm!"));
             }
             
-            // Kiểm tra user có quyền không
+
             if (!item.getUser().getId().equals(userId)) {
                 return ResponseEntity.status(403).body(createErrorResponse("Không có quyền!"));
             }
@@ -171,13 +163,13 @@ public class CartRestController {
                 );
             }
             
-            // Giảm số lượng
+
             int newQuantity = item.getQuantity() - 1;
             cartService.updateQuantity(id, newQuantity);
             
             System.out.println("✅ Decreased: " + item.getQuantity() + " → " + newQuantity);
             
-            // Lấy thông tin mới
+
             User user = userService.getUserById(userId);
             Double newTotal = cartService.getCartTotal(user);
             int newCartCount = cartService.getCartCount(user);
@@ -200,28 +192,26 @@ public class CartRestController {
         }
     }
     
-    /**
-     * Xóa sản phẩm khỏi giỏ
-     */
+
     @DeleteMapping("/remove/{id}")
     public ResponseEntity<?> removeItem(@PathVariable Long id, HttpSession session) {
         try {
             System.out.println("=== API: REMOVE ITEM ===");
             System.out.println("Cart Item ID: " + id);
             
-            // Kiểm tra đăng nhập
+
             Long userId = (Long) session.getAttribute("userId");
             if (userId == null) {
                 return ResponseEntity.status(401).body(createErrorResponse("Vui lòng đăng nhập!"));
             }
             
-            // Lấy cart item
+
             CartItem item = cartService.getCartItemById(id);
             if (item == null) {
                 return ResponseEntity.badRequest().body(createErrorResponse("Không tìm thấy sản phẩm!"));
             }
             
-            // Kiểm tra quyền
+
             if (!item.getUser().getId().equals(userId)) {
                 return ResponseEntity.status(403).body(createErrorResponse("Không có quyền!"));
             }
@@ -231,7 +221,7 @@ public class CartRestController {
             
             System.out.println("✅ Removed successfully");
             
-            // Lấy thông tin mới
+
             User user = userService.getUserById(userId);
             Double newTotal = cartService.getCartTotal(user);
             int newCartCount = cartService.getCartCount(user);
@@ -251,9 +241,7 @@ public class CartRestController {
         }
     }
     
-    /**
-     * KIỂM TRA MÃ GIẢM GIÁ
-     */
+
     @PostMapping("/apply-coupon")
     public ResponseEntity<?> applyCoupon(@RequestParam String code,
                                         @RequestParam Double orderTotal,
@@ -296,10 +284,7 @@ public class CartRestController {
             return ResponseEntity.status(500).body(createErrorResponse("Có lỗi xảy ra: " + e.getMessage()));
         }
     }
-    
-    /**
-     * Helper method tạo error response
-     */
+
     private Map<String, Object> createErrorResponse(String message) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", false);

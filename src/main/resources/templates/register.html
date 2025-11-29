@@ -38,7 +38,7 @@
     <div th:if="${success}" class="success" th:text="${success}"></div>
 
     <form method="post" action="/register" id="registerForm">
-        <!-- Tên đăng nhập -->
+
         <div class="form-group">
             <label for="username">
                 👤 Tên đăng nhập: <span class="required">*</span>
@@ -54,7 +54,7 @@
             <small class="hint">Chỉ sử dụng chữ cái, số và dấu gạch dưới</small>
         </div>
 
-        <!-- Họ tên -->
+
         <div class="form-group">
             <label for="fullName">
                 📛 Họ và tên: <span class="required">*</span>
@@ -67,7 +67,7 @@
                    autocomplete="name">
         </div>
 
-        <!-- Email -->
+
         <div class="form-group">
             <label for="email">
                 📧 Email: <span class="required">*</span>
@@ -81,7 +81,7 @@
             <small class="hint">Email sẽ được dùng để xác thực tài khoản</small>
         </div>
 
-        <!-- Mật khẩu -->
+
         <div class="form-group">
             <label for="password">
                 🔒 Mật khẩu: <span class="required">*</span>
@@ -99,7 +99,7 @@
             <small class="hint">Tối thiểu 6 ký tự, nên có chữ hoa, số và ký tự đặc biệt</small>
         </div>
 
-        <!-- Xác nhận mật khẩu -->
+
         <div class="form-group">
             <label for="confirmPassword">
                 🔐 Xác nhận mật khẩu: <span class="required">*</span>

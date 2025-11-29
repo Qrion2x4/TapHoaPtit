@@ -153,9 +153,7 @@ public class MainController {
         return "verify-email";
     }
     
-    // ============================================
-    // QUÊN MẬT KHẨU
-    // ============================================
+
     @GetMapping("/forgot-password")
     public String forgotPasswordPage() {
         return "forgot-password";
@@ -174,9 +172,7 @@ public class MainController {
         return "forgot-password";
     }
     
-    // ============================================
-    // RESET MẬT KHẨU
-    // ============================================
+
     @GetMapping("/reset-password")
     public String resetPasswordPage(@RequestParam String token, Model model) {
         try {
@@ -216,9 +212,7 @@ public class MainController {
         }
     }
     
-    // ============================================
-    // ĐỔI MẬT KHẨU (KHI ĐÃ ĐĂNG NHẬP)
-    // ============================================
+
     @GetMapping("/change-password")
     public String changePasswordPage(HttpSession session, Model model) {
         Long userId = (Long) session.getAttribute("userId");
@@ -262,9 +256,7 @@ public class MainController {
         return "change-password";
     }
     
-    // ============================================
-    // ĐĂNG XUẤT
-    // ============================================
+
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         System.out.println("=== LOGOUT ===");
@@ -272,9 +264,7 @@ public class MainController {
         return "redirect:/";
     }
     
-    // ============================================
-    // SẢN PHẨM THEO DANH MỤC
-    // ============================================
+
     @GetMapping("/products/category/{category}")
     public String productsByCategory(@PathVariable String category, Model model, HttpSession session) {
         String username = (String) session.getAttribute("username");
@@ -298,9 +288,7 @@ public class MainController {
         return "category";
     }
     
-    // ============================================
-    // TÌM KIẾM
-    // ============================================
+
     @GetMapping("/search")
     public String search(@RequestParam String keyword, Model model, HttpSession session) {
         String username = (String) session.getAttribute("username");
@@ -325,9 +313,7 @@ public class MainController {
         return "category";
     }
     
-    // ============================================
-    // ĐỌN HÀNG CỦA TÔI
-    // ============================================
+
     @GetMapping("/my-orders")
     public String myOrders(HttpSession session, Model model) {
         Long userId = (Long) session.getAttribute("userId");

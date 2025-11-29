@@ -15,7 +15,7 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())  // Tắt CSRF để test
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/**").permitAll()  // Cho phép tất cả requests
+                .requestMatchers("/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form.disable())

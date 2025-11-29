@@ -29,9 +29,7 @@ public class OrderController {
 
     @Autowired
     private CouponService couponService;
-    /**
-     * ĐẶT HÀNG CHỈ SẢN PHẨM ĐÃ CHỌN  - CÓ COUPON
-     */
+
     @PostMapping("/place-selected")
     public String placeSelectedOrder(@RequestParam String phone,
                                      @RequestParam String address,
@@ -109,9 +107,7 @@ public class OrderController {
         }
     }
 
-    /**
-     *  HỦY ĐƠN HÀNG
-     */
+
     @PostMapping("/cancel/{orderId}")
     public String cancelOrder(@PathVariable Long orderId,
                               @RequestParam(required = false) String reason, // Nhận lý do
@@ -142,7 +138,7 @@ public class OrderController {
 
             String currentStatus = order.getStatus();
 
-            // --- XỬ LÝ HỦY ĐƠN ---
+
             if ("PENDING".equals(currentStatus)) {
                 // Đơn mới -> Hủy ngay lập tức
                 orderService.updateOrderStatus(orderId, "CANCELLED");

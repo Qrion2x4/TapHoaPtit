@@ -36,9 +36,7 @@ public class CartService {
         return count;
     }
     
-    /**
-     * LẤY CART ITEM THEO ID
-     */
+
     public CartItem getCartItemById(Long id) {
         System.out.println("Getting cart item by ID: " + id);
         Optional<CartItem> item = cartItemRepository.findById(id);

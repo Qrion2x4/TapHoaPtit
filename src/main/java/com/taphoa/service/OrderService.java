@@ -25,9 +25,7 @@ public class OrderService {
     @Autowired
     private ProductRepository productRepository;
 
-    /**
-     *  TẠO ĐƠN HÀNG CHỈ VỚI CÁC SẢN PHẨM ĐÃ CHỌN + COUPON
-     */
+
     @Transactional
     public Order createOrderFromSelectedItems(User user,
                                               List<Long> selectedCartItemIds,
@@ -42,10 +40,9 @@ public class OrderService {
         System.out.println("Coupon Code: " + couponCode);
         System.out.println("Discount Amount: " + discountAmount);
 
-        // Lấy TẤT CẢ cart items của user
         List<CartItem> allCartItems = cartService.getCartItems(user);
 
-        // Lọc chỉ lấy các item đã được chọn
+
         List<CartItem> selectedCartItems = allCartItems.stream()
                 .filter(item -> selectedCartItemIds.contains(item.getId()))
                 .collect(Collectors.toList());
@@ -56,22 +53,22 @@ public class OrderService {
             throw new RuntimeException("Không tìm thấy sản phẩm đã chọn!");
         }
 
-        // TÍNH TỔNG TIỀN GỐC (subtotal) - TRƯỚC GIẢM GIÁ
+
         double subtotal = selectedCartItems.stream()
                 .mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity())
                 .sum();
 
-        // XỬ LÝ DISCOUNT
+
         double finalDiscount = (discountAmount != null && discountAmount > 0) ? discountAmount : 0.0;
 
-        // TÍNH TỔNG TIỀN SAU GIẢM (totalAmount)
+
         double totalAmount = subtotal - finalDiscount;
 
         System.out.println("Subtotal: " + subtotal);
         System.out.println("Discount: " + finalDiscount);
         System.out.println("Total: " + totalAmount);
 
-        // TẠO ĐƠN HÀNG VỚI ĐẦY ĐỦ THÔNG TIN
+
         Order order = new Order();
         order.setUser(user);
         order.setPhone(phone);
@@ -85,7 +82,7 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        // Tạo order items CHỈ từ các sản phẩm đã chọn
+
         for (CartItem cartItem : selectedCartItems) {
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(savedOrder);
@@ -97,7 +94,7 @@ public class OrderService {
             System.out.println("  - Added: " + cartItem.getProduct().getName() + " x" + cartItem.getQuantity());
         }
 
-        // XÓA CHỈ CÁC SẢN PHẨM ĐÃ CHỌN khỏi giỏ hàng
+
         for (CartItem cartItem : selectedCartItems) {
             cartService.removeFromCart(cartItem.getId());
             System.out.println("  - Removed from cart: " + cartItem.getProduct().getName());
@@ -115,9 +112,7 @@ public class OrderService {
 
         String oldStatus = order.getStatus();
 
-        // ======================
-        // 1. Trừ kho khi COMPLETED
-        // ======================
+
         if (!"COMPLETED".equals(oldStatus) && "COMPLETED".equals(newStatus)) {
 
             for (OrderItem item : order.getOrderItems()) {
@@ -137,17 +132,12 @@ public class OrderService {
             }
         }
 
-        // ======================
-        // 2. Cập nhật trạng thái đơn
-        // ======================
+
         order.setStatus(newStatus);
         orderRepository.save(order);
     }
 
 
-    /**
-     * METHOD
-     */
 
     public List<Order> getAllOrders() {
         return orderRepository.findAllByOrderByCreatedAtDesc();
@@ -224,21 +214,21 @@ public class OrderService {
     public void rejectCancel(Long orderId) {
         Order order = orderRepository.findById(orderId).orElse(null);
 
-        // Chỉ từ chối nếu đơn đang ở trạng thái Yêu cầu hủy
+
         if (order != null && "CANCEL_REQUESTED".equals(order.getStatus())) {
 
-            // 1. Khôi phục về trạng thái Đã xác nhận (để tiếp tục giao hàng)
+
             order.setStatus("CONFIRMED");
 
-            // 2. CẬP NHẬT GHI CHÚ 
+
             String oldNote = order.getNote() != null ? order.getNote() : "";
             String rejectMessage = "Shop đã từ chối yêu cầu hủy đơn";
 
-            // Nối ghi chú mới vào sau ghi chú cũ
+
             String newNote = oldNote.isEmpty() ? rejectMessage : oldNote + " | " + rejectMessage;
             order.setNote(newNote);
 
-            // 3. Lưu xuống Database
+
             orderRepository.save(order);
 
             System.out.println("❌ Admin rejected cancel for order #" + orderId);

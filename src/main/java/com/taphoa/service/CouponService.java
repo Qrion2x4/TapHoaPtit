@@ -22,9 +22,7 @@ public class CouponService {
     @Autowired
     private UserCouponRepository userCouponRepository;
     
-    /**
-     * Kiểm tra mã giảm giá
-     */
+
     public Map<String, Object> validateCoupon(String code, User user, Double orderTotal) {
         Map<String, Object> result = new HashMap<>();
         
@@ -38,7 +36,7 @@ public class CouponService {
         
         Coupon coupon = couponOpt.get();
         
-        // Kiểm tra thời gian
+
         LocalDateTime now = LocalDateTime.now();
         if (coupon.getValidFrom() != null && now.isBefore(coupon.getValidFrom())) {
             result.put("valid", false);
@@ -51,21 +49,21 @@ public class CouponService {
             return result;
         }
         
-        // Kiểm tra đơn tối thiểu
+
         if (coupon.getMinOrderAmount() != null && orderTotal < coupon.getMinOrderAmount()) {
             result.put("valid", false);
             result.put("message", "Đơn hàng tối thiểu " + String.format("%,.0f", coupon.getMinOrderAmount()) + "₫!");
             return result;
         }
         
-        // Kiểm tra đã dùng chưa
+
         if (userCouponRepository.existsByUserAndCoupon(user, coupon)) {
             result.put("valid", false);
             result.put("message", "Bạn đã sử dụng mã này rồi!");
             return result;
         }
         
-        // Tính giảm giá
+
         Double discount = orderTotal * (coupon.getDiscountPercent() / 100);
         if (coupon.getMaxDiscount() != null && discount > coupon.getMaxDiscount()) {
             discount = coupon.getMaxDiscount();
@@ -80,9 +78,7 @@ public class CouponService {
         return result;
     }
     
-    /**
-     * Lưu lại mã đã dùng
-     */
+
     @Transactional
     public void markCouponAsUsed(User user, Coupon coupon, Long orderId) {
         UserCoupon userCoupon = new UserCoupon();
@@ -93,9 +89,7 @@ public class CouponService {
         System.out.println("✅ Marked coupon " + coupon.getCode() + " as used for order #" + orderId);
     }
     
-    /**
-     * Lấy coupon theo code
-     */
+
     public Coupon getCouponByCode(String code) {
         if (code == null || code.trim().isEmpty()) {
             return null;
@@ -104,12 +98,10 @@ public class CouponService {
         return couponOpt.orElse(null);
     }
     
-    /**
-     * Tạo mã NEWBIE
-     */
+
     @Transactional
     public void createNewbieCoupon() {
-        // Kiểm tra đã tồn tại chưa
+
         if (couponRepository.findByCodeAndActiveTrue("NEWBIE").isPresent()) {
             return;
         }

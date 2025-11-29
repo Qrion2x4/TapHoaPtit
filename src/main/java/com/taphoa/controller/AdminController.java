@@ -96,9 +96,7 @@ public class AdminController {
         return "admin/dashboard";
     }
 
-    /**
-     * API lấy thống kê doanh thu và doanh số theo khoảng ngày
-     */
+
     @GetMapping("/api/statistics")
     @ResponseBody
     public Map<String, Object> getStatistics(
@@ -110,7 +108,7 @@ public class AdminController {
             return Map.of("error", "Unauthorized");
         }
 
-        // Mặc định: 30 ngày gần nhất
+
         if (endDate == null) endDate = LocalDate.now();
         if (startDate == null) startDate = endDate.minusDays(30);
 
@@ -162,9 +160,7 @@ public class AdminController {
         return stats;
     }
 
-    /**
-     * API lấy doanh thu theo tháng
-     */
+
     @GetMapping("/api/monthly-statistics")
     @ResponseBody
     public Map<String, Object> getMonthlyStatistics(
